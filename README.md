@@ -1,2 +1,3 @@
-# mask_bev
-Source code for "MaskBEV: Bird's-eye View Object Detection in Point Clouds using Masked-attention Mask Transformers for Large Vehicles"
+# MaskBEV: Bird's-eye View Object Detection in Point Clouds using Masked-attention Mask Transformers for Large Vehicles
+
+Source code will soon be released.
