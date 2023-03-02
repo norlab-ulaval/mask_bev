@@ -1,3 +1,3 @@
-# MaskBEV: Bird's-eye View Object Detection in Point Clouds using Masked-attention Mask Transformers for Large Vehicles
+# MaskBEV: Joint Object Detection and Footprint Completion for Bird's-eye View 3D Point Clouds
 
 Source code will soon be released.
