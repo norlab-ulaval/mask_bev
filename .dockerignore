@@ -1,0 +1,10 @@
+/venv/
+/.idea/
+**/__pycache__/
+*.out
+.pytest_cache
+/checkpoints/
+/data/
+/tb_logs/
+/optuna_saves/
+/lightning_logs/

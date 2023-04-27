@@ -1,0 +1,22 @@
+services:
+  training:
+    build: .
+    stdin_open: true
+    tty: true
+    ipc: host
+    depends_on:
+      - waymo_server
+    volumes:
+      - ./data/KITTI:/app/data/KITTI
+      - ./data/SemanticKITTI:/app/data/SemanticKITTI
+      - ./data/Waymo:/app/data/Waymo
+      - ./tb_logs:/app/tb_logs
+      - ./checkpoints:/app/checkpoints
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: [ $CUDA_VISIBLE_DEVICES ]
+              capabilities: [ gpu, utility, compute, video ]
+#    entrypoint: /app/...
