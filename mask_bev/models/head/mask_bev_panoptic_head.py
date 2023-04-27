@@ -26,7 +26,7 @@ class PointMaskPanopticHead(nn.Module):
         self._panoptic_head.init_weights()
 
     def forward(self, x):
-        img_meta = [{} for _ in range(x[0].shape[0])]
+        img_meta = [Config(dict(metainfo={})) for _ in range(x[0].shape[0])]
         return self._panoptic_head.forward(x, img_meta)
 
     def loss(self, cls, masks, label_gt, masks_gt, heights_pred, heights_gt):
@@ -291,122 +291,231 @@ class PointMaskPanopticHead(nn.Module):
         num_heads = 8
 
         return Config(dict(
-            in_channels=in_channels,  # pass to pixel_decoder inside
+            type='Mask2FormerHead',
+            in_channels=in_channels,
             strides=[4, 8, 16, 32],
             feat_channels=head_feat_channels,
             out_channels=head_out_channels,
-            num_things_classes=num_things_classes,
-            num_stuff_classes=num_stuff_classes,
+            num_classes=num_classes,
             num_queries=num_queries,
             num_transformer_feat_level=num_transformer_feat_level,
+            align_corners=False,
             pixel_decoder=dict(
-                type='MSDeformAttnPixelDecoder',
+                type='mmdet.MSDeformAttnPixelDecoder',
                 num_outs=num_transformer_feat_level,
                 norm_cfg=dict(type='GN', num_groups=32),
                 act_cfg=dict(type='ReLU'),
-                encoder=dict(
-                    type='DetrTransformerEncoder',
+                encoder=dict(  # DeformableDetrTransformerEncoder
                     num_layers=6,
-                    transformerlayers=dict(
-                        type='BaseTransformerLayer',
-                        attn_cfgs=dict(
-                            type='MultiScaleDeformableAttention',
+                    layer_cfg=dict(  # DeformableDetrTransformerEncoderLayer
+                        self_attn_cfg=dict(  # MultiScaleDeformableAttention
                             embed_dims=head_feat_channels,
                             num_heads=num_heads,
                             num_levels=num_transformer_feat_level,
                             num_points=4,
                             im2col_step=64,
                             dropout=0.0,
-                            batch_first=False,
+                            batch_first=True,
                             norm_cfg=None,
                             init_cfg=None),
-                        ffn_cfgs=dict(
-                            type='FFN',
+                        ffn_cfg=dict(
                             embed_dims=head_feat_channels,
                             feedforward_channels=1024,
                             num_fcs=2,
                             ffn_drop=0.0,
-                            act_cfg=dict(type='ReLU', inplace=True)),
-                        operation_order=('self_attn', 'norm', 'ffn', 'norm')),
+                            act_cfg=dict(type='ReLU', inplace=True))),
                     init_cfg=None),
-                positional_encoding=dict(
-                    type='SinePositionalEncoding', num_feats=head_feat_channels // 2, normalize=True),
+                positional_encoding=dict(  # SinePositionalEncoding
+                    num_feats=head_feat_channels // 2, normalize=True),
                 init_cfg=None),
             enforce_decoder_input_project=False,
-            positional_encoding=dict(
-                type='SinePositionalEncoding', num_feats=head_feat_channels // 2, normalize=True),
-            transformer_decoder=dict(
-                type='DetrTransformerDecoder',
+            positional_encoding=dict(  # SinePositionalEncoding
+                num_feats=head_feat_channels // 2, normalize=True),
+            transformer_decoder=dict(  # Mask2FormerTransformerDecoder
                 return_intermediate=True,
                 num_layers=9,
-                transformerlayers=dict(
-                    type='DetrTransformerDecoderLayer',
-                    attn_cfgs=dict(
-                        type='MultiheadAttention',
+                layer_cfg=dict(  # Mask2FormerTransformerDecoderLayer
+                    self_attn_cfg=dict(  # MultiheadAttention
                         embed_dims=head_feat_channels,
                         num_heads=num_heads,
                         attn_drop=0.0,
                         proj_drop=0.0,
                         dropout_layer=None,
-                        batch_first=False),
-                    ffn_cfgs=dict(
+                        batch_first=True),
+                    cross_attn_cfg=dict(  # MultiheadAttention
+                        embed_dims=head_feat_channels,
+                        num_heads=num_heads,
+                        attn_drop=0.0,
+                        proj_drop=0.0,
+                        dropout_layer=None,
+                        batch_first=True),
+                    ffn_cfg=dict(
                         embed_dims=head_feat_channels,
                         feedforward_channels=2048,
                         num_fcs=2,
                         act_cfg=dict(type='ReLU', inplace=True),
                         ffn_drop=0.0,
                         dropout_layer=None,
-                        add_identity=True),
-                    feedforward_channels=2048,
-                    operation_order=('cross_attn', 'norm', 'self_attn', 'norm',
-                                     'ffn', 'norm')),
+                        add_identity=True)),
                 init_cfg=None),
             loss_cls=dict(
-                type='CrossEntropyLoss',
+                type='mmdet.CrossEntropyLoss',
                 use_sigmoid=False,
                 loss_weight=2.0,
                 reduction='mean',
                 class_weight=class_weights),
-            loss_height=dict(
-                type='CrossEntropyLoss',
-                use_sigmoid=False,
-                loss_weight=2.0,
-                reduction='mean'),
             loss_mask=dict(
-                type='CrossEntropyLoss',
+                type='mmdet.CrossEntropyLoss',
                 use_sigmoid=True,
                 reduction='mean',
                 loss_weight=5.0),
             loss_dice=dict(
-                type='DiceLoss',
+                type='mmdet.DiceLoss',
                 use_sigmoid=True,
                 activate=True,
                 reduction='mean',
                 naive_dice=True,
                 eps=1.0,
-                loss_weight=5.0)),
+                loss_weight=5.0),
             train_cfg=dict(
                 num_points=12544,
                 oversample_ratio=3.0,
                 importance_sample_ratio=0.75,
                 assigner=dict(
-                    type='MaskHungarianAssigner',
-                    cls_cost=dict(type='ClassificationCost', weight=2.0),
-                    mask_cost=dict(
-                        type='CrossEntropyLossCost', weight=5.0, use_sigmoid=True),
-                    dice_cost=dict(
-                        type='DiceCost', weight=5.0, pred_act=True, eps=1.0)),
-                sampler=dict(type='MaskPseudoSampler')),
-            # test_cfg=dict(
-            #     panoptic_on=True,
-            #     # For now, the dataset does not support
-            #     # evaluating semantic segmentation metric.
-            #     semantic_on=False,
-            #     instance_on=True,
-            #     # max_per_image is for instance segmentation.
-            #     max_per_image=100,
-            #     iou_thr=0.8,
-            #     # In Mask2Former's panoptic postprocessing,
-            #     # it will filter mask area where score is less than 0.5 .
-            #     filter_low_score=True)
-        )
+                    type='mmdet.HungarianAssigner',
+                    match_costs=[
+                        dict(type='mmdet.ClassificationCost', weight=2.0),
+                        dict(
+                            type='mmdet.CrossEntropyLossCost',
+                            weight=5.0,
+                            use_sigmoid=True),
+                        dict(
+                            type='mmdet.DiceCost',
+                            weight=5.0,
+                            pred_act=True,
+                            eps=1.0)
+                    ]),
+                sampler=dict(type='mmdet.MaskPseudoSampler'))),
+            train_cfg=dict(),
+            test_cfg=dict(mode='whole'))
+
+        # return Config(dict(
+        #     in_channels=in_channels,  # pass to pixel_decoder inside
+        #     strides=[4, 8, 16, 32],
+        #     feat_channels=head_feat_channels,
+        #     out_channels=head_out_channels,
+        #     num_things_classes=num_things_classes,
+        #     num_stuff_classes=num_stuff_classes,
+        #     num_queries=num_queries,
+        #     num_transformer_feat_level=num_transformer_feat_level,
+        #     pixel_decoder=dict(
+        #         type='MSDeformAttnPixelDecoder',
+        #         num_outs=num_transformer_feat_level,
+        #         norm_cfg=dict(type='GN', num_groups=32),
+        #         act_cfg=dict(type='ReLU'),
+        #         encoder=dict(
+        #             type='DetrTransformerEncoder',
+        #             num_layers=6,
+        #             transformerlayers=dict(
+        #                 type='BaseTransformerLayer',
+        #                 attn_cfgs=dict(
+        #                     type='MultiScaleDeformableAttention',
+        #                     embed_dims=head_feat_channels,
+        #                     num_heads=num_heads,
+        #                     num_levels=num_transformer_feat_level,
+        #                     num_points=4,
+        #                     im2col_step=64,
+        #                     dropout=0.0,
+        #                     batch_first=False,
+        #                     norm_cfg=None,
+        #                     init_cfg=None),
+        #                 ffn_cfgs=dict(
+        #                     type='FFN',
+        #                     embed_dims=head_feat_channels,
+        #                     feedforward_channels=1024,
+        #                     num_fcs=2,
+        #                     ffn_drop=0.0,
+        #                     act_cfg=dict(type='ReLU', inplace=True)),
+        #                 operation_order=('self_attn', 'norm', 'ffn', 'norm')),
+        #             init_cfg=None),
+        #         positional_encoding=dict(
+        #             type='SinePositionalEncoding', num_feats=head_feat_channels // 2, normalize=True),
+        #         init_cfg=None),
+        #     enforce_decoder_input_project=False,
+        #     positional_encoding=dict(
+        #         type='SinePositionalEncoding', num_feats=head_feat_channels // 2, normalize=True),
+        #     transformer_decoder=dict(
+        #         type='DetrTransformerDecoder',
+        #         return_intermediate=True,
+        #         num_layers=9,
+        #         transformerlayers=dict(
+        #             type='DetrTransformerDecoderLayer',
+        #             attn_cfgs=dict(
+        #                 type='MultiheadAttention',
+        #                 embed_dims=head_feat_channels,
+        #                 num_heads=num_heads,
+        #                 attn_drop=0.0,
+        #                 proj_drop=0.0,
+        #                 dropout_layer=None,
+        #                 batch_first=False),
+        #             ffn_cfgs=dict(
+        #                 embed_dims=head_feat_channels,
+        #                 feedforward_channels=2048,
+        #                 num_fcs=2,
+        #                 act_cfg=dict(type='ReLU', inplace=True),
+        #                 ffn_drop=0.0,
+        #                 dropout_layer=None,
+        #                 add_identity=True),
+        #             feedforward_channels=2048,
+        #             operation_order=('cross_attn', 'norm', 'self_attn', 'norm',
+        #                              'ffn', 'norm')),
+        #         init_cfg=None),
+        #     loss_cls=dict(
+        #         type='CrossEntropyLoss',
+        #         use_sigmoid=False,
+        #         loss_weight=2.0,
+        #         reduction='mean',
+        #         class_weight=class_weights),
+        #     loss_height=dict(
+        #         type='CrossEntropyLoss',
+        #         use_sigmoid=False,
+        #         loss_weight=2.0,
+        #         reduction='mean'),
+        #     loss_mask=dict(
+        #         type='CrossEntropyLoss',
+        #         use_sigmoid=True,
+        #         reduction='mean',
+        #         loss_weight=5.0),
+        #     loss_dice=dict(
+        #         type='DiceLoss',
+        #         use_sigmoid=True,
+        #         activate=True,
+        #         reduction='mean',
+        #         naive_dice=True,
+        #         eps=1.0,
+        #         loss_weight=5.0)),
+        #     train_cfg=dict(
+        #         num_points=12544,
+        #         oversample_ratio=3.0,
+        #         importance_sample_ratio=0.75,
+        #         assigner=dict(
+        #             type='MaskHungarianAssigner',
+        #             cls_cost=dict(type='ClassificationCost', weight=2.0),
+        #             mask_cost=dict(
+        #                 type='CrossEntropyLossCost', weight=5.0, use_sigmoid=True),
+        #             dice_cost=dict(
+        #                 type='DiceCost', weight=5.0, pred_act=True, eps=1.0)),
+        #         sampler=dict(type='MaskPseudoSampler')),
+        #     # test_cfg=dict(
+        #     #     panoptic_on=True,
+        #     #     # For now, the dataset does not support
+        #     #     # evaluating semantic segmentation metric.
+        #     #     semantic_on=False,
+        #     #     instance_on=True,
+        #     #     # max_per_image is for instance segmentation.
+        #     #     max_per_image=100,
+        #     #     iou_thr=0.8,
+        #     #     # In Mask2Former's panoptic postprocessing,
+        #     #     # it will filter mask area where score is less than 0.5 .
+        #     #     filter_low_score=True)
+        # )

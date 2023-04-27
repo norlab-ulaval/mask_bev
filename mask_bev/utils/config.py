@@ -12,10 +12,10 @@ class Config(dict):
         if item in self.keys():
             return self[item]
         else:
-            raise AttributeError()
+            raise AttributeError(f'{self} object has no attribute {item}')
 
     def __setattr__(self, key, value):
         if key in self.keys():
             self[key] = value
         else:
-            raise AttributeError()
+            raise AttributeError(f'{self} object has no attribute {key}')
