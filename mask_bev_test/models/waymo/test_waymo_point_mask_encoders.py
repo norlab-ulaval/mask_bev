@@ -7,12 +7,12 @@ import torch
 
 from mask_bev.datasets.semantic_kitti.semantic_kitti_mask_data_module import CollateType
 from mask_bev.datasets.waymo.waymo_data_module import WaymoDataModule
-from mask_bev.models.encoders.mask_bev_encoders import PointMaskEncoder, EncodingType
+from mask_bev.models.encoders.mask_bev_encoders import MaskBevEncoder, EncodingType
 
 tracemalloc.start()
 
 
-class TestWaymoPointMaskEncoders(unittest.TestCase):
+class TestWaymoMaskBevEncoders(unittest.TestCase):
     def setUp(self):
         self.batch_size = 2
         z_range = (-20, 20)
@@ -31,9 +31,9 @@ class TestWaymoPointMaskEncoders(unittest.TestCase):
         self.max_num_points = 100
         self.feat_channels = [16, 32, 64]
         self.channels = self.feat_channels[-1]
-        self.encoder = PointMaskEncoder(self.feat_channels, x_range, y_range, z_range, voxel_size,
-                                        voxel_size, voxel_size_z, self.max_num_points,
-                                        encoding_type=EncodingType.Vanilla, fourier_enc_group=4, pc_point_dim=3)
+        self.encoder = MaskBevEncoder(self.feat_channels, x_range, y_range, z_range, voxel_size,
+                                      voxel_size, voxel_size_z, self.max_num_points,
+                                      encoding_type=EncodingType.Vanilla, fourier_enc_group=4, pc_point_dim=3)
 
     def test_voxelization(self):
         x, y, _ = self.batch

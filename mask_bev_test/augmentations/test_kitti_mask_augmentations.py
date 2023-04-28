@@ -10,7 +10,7 @@ from mask_bev.augmentations.kitti_mask_augmentations import Flip, ShufflePoints,
     JitterPoints, RandomDropPoints, GlobalNoise, BoxNoise, ObjectSample
 from mask_bev.datasets.collate_type import CollateType
 from mask_bev.datasets.kitti.kitti_data_module import KittiDataModule
-from mask_bev.models.encoders.mask_bev_encoders import PointMaskEncoder, EncodingType
+from mask_bev.models.encoders.mask_bev_encoders import MaskBevEncoder, EncodingType
 
 
 class TestMaskAugmentations(unittest.TestCase):
@@ -23,9 +23,9 @@ class TestMaskAugmentations(unittest.TestCase):
         self.max_num_points = 100
         self.sample_idx = 1
         self.seed = 50
-        self.encoder = PointMaskEncoder(self.feat_channels, self.x_range, self.y_range, self.z_range, voxel_size,
-                                        voxel_size, voxel_size_z, self.max_num_points,
-                                        encoding_type=EncodingType.Vanilla, fourier_enc_group=4)
+        self.encoder = MaskBevEncoder(self.feat_channels, self.x_range, self.y_range, self.z_range, voxel_size,
+                                      voxel_size, voxel_size_z, self.max_num_points,
+                                      encoding_type=EncodingType.Vanilla, fourier_enc_group=4)
 
     @unittest.skip('plot')
     def test_flip_y(self):

@@ -10,7 +10,7 @@ from mask_bev.augmentations.waymo_mask_augmentations import Flip, ShufflePoints,
     JitterPoints, RandomDropPoints
 from mask_bev.datasets.collate_type import CollateType
 from mask_bev.datasets.waymo.waymo_data_module import WaymoDataModule
-from mask_bev.models.encoders.mask_bev_encoders import PointMaskEncoder, EncodingType
+from mask_bev.models.encoders.mask_bev_encoders import MaskBevEncoder, EncodingType
 
 
 class TestMaskAugmentations(unittest.TestCase):
@@ -22,9 +22,9 @@ class TestMaskAugmentations(unittest.TestCase):
         voxel_size = 0.16
         voxel_size_z = self.z_range[1] - self.z_range[0]
         self.max_num_points = 100
-        self.encoder = PointMaskEncoder(self.feat_channels, self.x_range, self.y_range, self.z_range, voxel_size,
-                                        voxel_size, voxel_size_z, self.max_num_points,
-                                        encoding_type=EncodingType.Vanilla, fourier_enc_group=4, pc_point_dim=3)
+        self.encoder = MaskBevEncoder(self.feat_channels, self.x_range, self.y_range, self.z_range, voxel_size,
+                                      voxel_size, voxel_size_z, self.max_num_points,
+                                      encoding_type=EncodingType.Vanilla, fourier_enc_group=4, pc_point_dim=3)
 
     @unittest.skip('plot')
     def test_flip_y(self):

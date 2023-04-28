@@ -8,7 +8,7 @@ from mask_bev.augmentations.semantic_kitti_mask_augmentations import make_semant
 from mask_bev.augmentations.waymo_mask_augmentations import make_waymo_augmentation_list
 from mask_bev.datasets.kitti.kitti_data_module import KittiDataModule
 from mask_bev.datasets.waymo.waymo_data_module import WaymoDataModule
-from mask_bev.mask_bev_module import PointMaskModule
+from mask_bev.mask_bev_module import MaskBevModule
 
 os.environ['OMP_NUM_THREADS'] = str(6)
 
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     with open(config_path, 'r') as f:
         config: dict = yaml.safe_load(f)
 
-    model = PointMaskModule.from_config(config, exp_name, checkpoint_folder_path)
+    model = MaskBevModule.from_config(config, exp_name, checkpoint_folder_path)
 
     # data
     dataset_name = config.get('dataset', 'semantic-kitti')

@@ -4,7 +4,7 @@ from mask_bev.models.networks.swin.swin import CustomSwinTransformer
 
 
 # TODO add pre-trained backbone
-class PointMaskBackbone(nn.Module):
+class MaskBevBackbone(nn.Module):
     def __init__(self, pseudo_img_size: (int, int), in_channels: int, embded_dims: int, patch_size: int,
                  window_size: int, strides: (int, int, int, int), use_abs_enc: bool, swap_dims: bool = False,
                  backbone_overwrites=None):

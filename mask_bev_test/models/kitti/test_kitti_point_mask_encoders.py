@@ -8,12 +8,12 @@ import torch
 
 from mask_bev.datasets.kitti.kitti_data_module import KittiDataModule
 from mask_bev.datasets.semantic_kitti.semantic_kitti_mask_data_module import CollateType
-from mask_bev.models.encoders.mask_bev_encoders import PointMaskEncoder, EncodingType
+from mask_bev.models.encoders.mask_bev_encoders import MaskBevEncoder, EncodingType
 
 tracemalloc.start()
 
 
-class TestPointMaskEncoders(unittest.TestCase):
+class TestMaskBevEncoders(unittest.TestCase):
     def setUp(self):
         self.batch_size = 1
         z_range = (-20, 20)
@@ -36,9 +36,9 @@ class TestPointMaskEncoders(unittest.TestCase):
         self.max_num_points = 100
         self.feat_channels = [16, 32, 64]
         self.channels = self.feat_channels[-1]
-        self.encoder = PointMaskEncoder(self.feat_channels, x_range, y_range, z_range, voxel_size,
-                                        voxel_size, voxel_size_z, self.max_num_points,
-                                        encoding_type=EncodingType.Vanilla, fourier_enc_group=4)
+        self.encoder = MaskBevEncoder(self.feat_channels, x_range, y_range, z_range, voxel_size,
+                                      voxel_size, voxel_size_z, self.max_num_points,
+                                      encoding_type=EncodingType.Vanilla, fourier_enc_group=4)
 
     def test_voxelization(self):
         x, y, _ = self.batch

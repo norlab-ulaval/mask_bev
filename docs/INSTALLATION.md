@@ -9,10 +9,10 @@ pip install -r requirements.txt
 pip install -r requirements-visualization.txt
 
 # Install mmlabs packages
-source venv/bin/activate # Be sure to activate the venv again after install openmim
+# Be sure to activate the venv again after install openmim
+source venv/bin/activate
 mim install mmcv
 mim install mmdet
 mim install mmsegmentation
 mim install mmdet3d
-
 ```

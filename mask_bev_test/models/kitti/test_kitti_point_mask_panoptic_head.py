@@ -3,20 +3,20 @@ import unittest
 
 import torch
 
-from mask_bev.models.head.mask_bev_panoptic_head import PointMaskPanopticHead
+from mask_bev.models.head.mask_bev_panoptic_head import MaskBevPanopticHead
 
 tracemalloc.start()
 
 
-class TestPointMaskPanopticHead(unittest.TestCase):
+class TestMaskBevPanopticHead(unittest.TestCase):
     def setUp(self):
         self.batch_size = 2
         sizes_w = [35, 18, 9, 5]
         sizes_h = [40, 20, 10, 5]
         dims = [2 ** i * 96 for i in range(4)]
         self.num_queries = 40
-        self.panoptic_head = PointMaskPanopticHead(dims, feat_channels=256, out_channels=256,
-                                                   num_queries=self.num_queries, num_classes=1)
+        self.panoptic_head = MaskBevPanopticHead(dims, feat_channels=256, out_channels=256,
+                                                 num_queries=self.num_queries, num_classes=1)
         self.backbone_out = [torch.randn((self.batch_size, dims[i], sizes_w[i], sizes_h[i])) for i in range(4)]
         self.mask_gt = torch.randn((self.batch_size, 160, 160))
         num_classes = 2

@@ -17,7 +17,7 @@ class EncodingType:
 
 
 # TODO NeRF-like encoding (sin(2^0 pi x), cos(...), ..., sin(2^N pi x), cos(...))
-class PointMaskEncoder(nn.Module):
+class MaskBevEncoder(nn.Module):
     def __init__(self, feat_channels: [int], x_range: (int, int), y_range: (int, int),
                  z_range: (int, int), voxel_size_x: float, voxel_size_y: float, voxel_size_z: float,
                  max_num_points: int, encoding_type: str, fourier_enc_group: int,

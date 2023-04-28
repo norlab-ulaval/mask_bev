@@ -3,12 +3,12 @@ import unittest
 
 import torch
 
-from mask_bev.models.backbones.mask_bev_backbone import PointMaskBackbone
+from mask_bev.models.backbones.mask_bev_backbone import MaskBevBackbone
 
 tracemalloc.start()
 
 
-class TestWaymoPointMaskBackbone(unittest.TestCase):
+class TestWaymoMaskBevBackbone(unittest.TestCase):
     def setUp(self):
         self.batch_size = 2
         self.channels = 64
@@ -17,8 +17,8 @@ class TestWaymoPointMaskBackbone(unittest.TestCase):
         self.num_voxel_y = int((y_range[1] - y_range[0]) // voxel_size)
         img_size = (self.num_voxel_x, self.num_voxel_y)
         self.embded_dims = 96
-        self.backbone = PointMaskBackbone(img_size, self.channels, self.embded_dims, patch_size=4, window_size=10,
-                                          strides=(4, 2, 2, 2), use_abs_enc=True)
+        self.backbone = MaskBevBackbone(img_size, self.channels, self.embded_dims, patch_size=4, window_size=10,
+                                        strides=(4, 2, 2, 2), use_abs_enc=True)
         self.pseudo_img = torch.randn((self.batch_size, self.channels, self.num_voxel_x, self.num_voxel_y))
 
     def test_backbone(self):

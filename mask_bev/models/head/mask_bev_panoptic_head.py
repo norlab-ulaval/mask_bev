@@ -15,7 +15,7 @@ from mask_bev.models.networks.mask2former_head.mask2former_head import Mask2Form
 from mask_bev.utils.config import Config
 
 
-class PointMaskPanopticHead(nn.Module):
+class MaskBevPanopticHead(nn.Module):
     def __init__(self, in_channels: List[int], feat_channels: int, out_channels: int, num_queries: int,
                  num_classes: int, reverse_class_weights: bool = False, predict_height: bool = False):
         super().__init__()
