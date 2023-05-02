@@ -33,6 +33,7 @@ class MaskBevPanopticHead(nn.Module):
         img_meta = [{} for i in range(cls[0].shape[0])]
         return self._panoptic_head.loss(cls, masks, label_gt, masks_gt, img_meta, heights_pred, heights_gt)
 
+    # TODO review average precision
     def add_average_precision(self, cls_metric: BinaryClassifMapMetric, height_metric: DetectionMapMetric,
                               mask_metric: DetectionMapMetric, cls_pred_score,
                               masks_pred, label_gt, mask_gt, heights_pred, heights_gt, metadata=None,

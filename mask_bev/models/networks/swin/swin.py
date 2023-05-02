@@ -593,11 +593,6 @@ class CustomSwinTransformer(BaseModule):
                 patch_row = pretrain_img_size[1] // patch_size
                 patch_col = pretrain_img_size[0] // patch_size
 
-            # TODO remove
-            print('WARNING remove this')
-            print('a' * 100)
-            patch_row, patch_col = 124, 124
-
             self.absolute_pos_embed = nn.Parameter(
                 torch.zeros((1, embed_dims, patch_row, patch_col)))
 

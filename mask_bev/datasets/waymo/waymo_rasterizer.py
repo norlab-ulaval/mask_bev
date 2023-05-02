@@ -32,10 +32,8 @@ class WaymoRasterizer:
             out_voxels[t] = np.zeros((self._num_voxel_x, self._num_voxel_y), dtype=int)
 
         labels: [Label] = frame.laser_labels
-        # TODO other labels
         labels: [Label] = [label for label in labels if label.type == Type.TYPE_VEHICLE]
         labels: [Label] = [label for label in labels if label.num_lidar_points_in_box >= self._min_points]
-        # TODO split by difficulty
         boxes: [(Box, Type)] = [(label.box, label.type) for label in labels]
         for instance, (b, t) in enumerate(boxes):
             b_contours = self._box_to_points(b)

@@ -46,7 +46,6 @@ class SemanticKittiMaskDataModule(pl.LightningDataModule):
         self._dataset_transform = dataset_transform
         self._predict_heights = predict_heights
 
-        # TODO add more classes
         included_labels = [SemanticKittiRawLabel.CAR]
 
         self._train_seq_dataset = SemanticKittiSequenceDataset(root_path, 'train', included_labels=included_labels)

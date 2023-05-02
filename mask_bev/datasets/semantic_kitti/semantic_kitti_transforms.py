@@ -60,7 +60,7 @@ class MaskToLabelInstanceMasks:
         labels = torch.zeros((self._num_pred,), dtype=torch.long)
         masks = torch.zeros((self._num_pred, h, w))
         for i, inst in enumerate(instances):
-            labels[i] = SemanticKittiLearningLabel.CAR  # TODO add more classes
+            labels[i] = SemanticKittiLearningLabel.CAR
             masks[i, mask == inst] = 1.0
         return labels, masks
 

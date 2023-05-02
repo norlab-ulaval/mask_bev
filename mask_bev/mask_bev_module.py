@@ -30,10 +30,6 @@ def hydra(q, k, v):
 """
 
 
-# TODO Mask dataset: flip all cars along its x-axis to have both sides (behind the curtain)
-# TODO Mask from bounding boxes
-# TODO increase num layers in decoder
-# TODO lr warmup
 class MaskBevModule(pl.LightningModule):
     def __init__(self, x_range: (int, int), y_range: (int, int), z_range: (int, int), voxel_size: float,
                  num_queries: int, max_num_points: int, encoder_feat_channels: [int], backbone_embed_dim: int,
@@ -205,11 +201,11 @@ class MaskBevModule(pl.LightningModule):
 
     def log_losses(self, batch_size, loss_dict, mode):
         for k, v in loss_dict.items():
-            self.log(f'{mode}_{k}', v, batch_size=batch_size)
-        loss_dice = sum(value for key, value in loss_dict.items() if 'dice' in key)
-        loss_mask = sum(value for key, value in loss_dict.items() if 'mask' in key)
-        loss_cls = sum(value for key, value in loss_dict.items() if 'cls' in key)
-        loss_height = sum(value for key, value in loss_dict.items() if 'height' in key)
+            self.log(f'{mode}_{k}', float(v), batch_size=batch_size)
+        loss_dice = float(sum(value for key, value in loss_dict.items() if 'dice' in key))
+        loss_mask = float(sum(value for key, value in loss_dict.items() if 'mask' in key))
+        loss_cls = float(sum(value for key, value in loss_dict.items() if 'cls' in key))
+        loss_height = float(sum(value for key, value in loss_dict.items() if 'height' in key))
         self.log(f'hp_{mode}_dice', loss_dice, on_step=False, on_epoch=True, batch_size=batch_size)
         self.log(f'hp_{mode}_mask', loss_mask, on_step=False, on_epoch=True, batch_size=batch_size)
         self.log(f'hp_{mode}_cls', loss_cls, on_step=False, on_epoch=True, batch_size=batch_size)

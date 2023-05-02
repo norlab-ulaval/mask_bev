@@ -186,7 +186,6 @@ class FrameDifficulty:
         return x
 
 
-# TODO remove objects out of range
 class ObjectRangeFilter:
     def __init__(self, range_x, range_y):
         self._range_x = range_x
