@@ -7,3 +7,5 @@ Source code will soon be released.
 Follow [dataset installation instructions](docs/DATASETS.md) to download and prepare the datasets.
 
 Follow [installation instructions](docs/INSTALLATION.md) to install the dependencies.
+
+Follow [training instructions](docs/TRAINING.md) to start training and evaluating MaskBEV.

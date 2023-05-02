@@ -1,9 +1,9 @@
 # General
 seed: 420
-#checkpoint: /home/william/exx_backup/checkpoints/01_point_mask/01_point_mask-epoch=10-val_loss=5.438405.ckpt
 
 # Model
 # from maskformer (CNN)
+#checkpoint: /home/william/exx_backup/checkpoints/01_point_mask/01_point_mask-epoch=10-val_loss=5.438405.ckpt
 lr: 1.0e-4
 weight_decay: 1.0e-4
 # lr = 1.0e-4 / 4

@@ -11,9 +11,11 @@ from mask_bev.models.positional_encoding.learnable_fourier_positional_encoding i
     LearnableFourierPositionalEncoding
 
 
+# TODO add simple cos and sin encoding
 class EncodingType:
     Vanilla = 'vanilla'
     Fourier = 'fourier'
+    Cosine = 'cosine'
 
 
 class MaskBevEncoder(nn.Module):
