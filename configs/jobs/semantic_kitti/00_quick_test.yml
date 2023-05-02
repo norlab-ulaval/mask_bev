@@ -22,7 +22,7 @@ y_range: [ -40, 40 ]
 z_range: [ -20, 20 ]
 voxel_size: 0.16
 num_queries: 50
-predict_heights: True
+predict_heights: False
 
 # Encoder
 max_num_points: 32

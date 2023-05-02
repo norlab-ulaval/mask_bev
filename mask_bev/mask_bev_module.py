@@ -239,6 +239,8 @@ class MaskBevModule(pl.LightningModule):
             metadata = None
         elif len(train_batch) == 3:
             x, (labels_gt, masks_gt), metadata = train_batch
+            # TODO add back metadata
+            metadata = None
         else:
             raise RuntimeError('Invalid batch')
         batch_size = len(x)
@@ -259,11 +261,12 @@ class MaskBevModule(pl.LightningModule):
         loss_dict = self.compute_loss(cls, masks, labels_gt, masks_gt, heights, heights_gt)
         loss = self.loss(loss_dict)
 
-        self._panoptic_head.add_average_precision(self._train_cls_map, self._train_height_map, self._train_mask_map,
-                                                  cls,
-                                                  masks, labels_gt, masks_gt, heights, heights_gt, metadata,
-                                                  [self._train_easy_map, self._train_moderate_map,
-                                                   self._train_hard_map], self._train_mIoU, self._train_mask_map_all)
+        # TODO add back average precision
+        # self._panoptic_head.add_average_precision(self._train_cls_map, self._train_height_map, self._train_mask_map,
+        #                                           cls,
+        #                                           masks, labels_gt, masks_gt, heights, heights_gt, metadata,
+        #                                           [self._train_easy_map, self._train_moderate_map,
+        #                                            self._train_hard_map], self._train_mIoU, self._train_mask_map_all)
 
         self.log('train_loss', loss, batch_size=batch_size, prog_bar=True)
         self.log('hp_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size)
@@ -287,6 +290,8 @@ class MaskBevModule(pl.LightningModule):
         return loss
 
     def on_train_epoch_end(self):
+        # TODO add back logging
+        return
         self.log('train_mIoU', self._train_mIoU.compute(), prog_bar=True)
         self.log('train_mAP_mask', self._train_mask_map.compute(), prog_bar=True)
         self.log('train_mAP_easy', self._train_easy_map.compute(), prog_bar=False)
@@ -329,12 +334,13 @@ class MaskBevModule(pl.LightningModule):
         loss_dict = self.compute_loss(cls, masks, labels_gt, masks_gt, heights, heights_gt)
         loss = self.loss(loss_dict)
 
-        self._panoptic_head.add_average_precision(self._val_cls_map, self._val_height_map, self._val_mask_map, cls,
-                                                  masks,
-                                                  labels_gt, masks_gt, heights, heights_gt, metadata,
-                                                  [self._val_easy_map, self._val_moderate_map, self._val_hard_map],
-                                                  self._val_mIoU, self._val_mask_map_all, self._val_mask_area,
-                                                  self._val_mIoU_points)
+        # TODO add average precision
+        # self._panoptic_head.add_average_precision(self._val_cls_map, self._val_height_map, self._val_mask_map, cls,
+        #                                           masks,
+        #                                           labels_gt, masks_gt, heights, heights_gt, metadata,
+        #                                           [self._val_easy_map, self._val_moderate_map, self._val_hard_map],
+        #                                           self._val_mIoU, self._val_mask_map_all, self._val_mask_area,
+        #                                           self._val_mIoU_points)
 
         self.log('val_loss', loss, batch_size=batch_size, prog_bar=True)
         self.log('hp_val_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size)
@@ -354,7 +360,9 @@ class MaskBevModule(pl.LightningModule):
                     current_mask += 1
         return loss
 
-    def on_validation_end(self):
+    def on_validation_epoch_end(self):
+        # TODO add back logging
+        return
         self.log('val_mIoU', self._val_mIoU.compute(), prog_bar=True)
         self.log('val_mIoU_points', self._val_mIoU_points.compute(), prog_bar=True)
 

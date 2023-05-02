@@ -296,7 +296,8 @@ class MaskBevPanopticHead(nn.Module):
             strides=[4, 8, 16, 32],
             feat_channels=head_feat_channels,
             out_channels=head_out_channels,
-            num_classes=num_classes,
+            num_things_classes=num_things_classes,
+            num_stuff_classes=num_stuff_classes,
             num_queries=num_queries,
             num_transformer_feat_level=num_transformer_feat_level,
             align_corners=False,
@@ -396,7 +397,6 @@ class MaskBevPanopticHead(nn.Module):
                             eps=1.0)
                     ]),
                 sampler=dict(type='mmdet.MaskPseudoSampler'))),
-            train_cfg=dict(),
             test_cfg=dict(mode='whole'))
 
         # return Config(dict(
