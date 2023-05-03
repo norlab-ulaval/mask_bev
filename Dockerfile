@@ -23,6 +23,3 @@ RUN mim install mmcv
 RUN mim install mmdet
 RUN mim install mmsegmentation
 RUN mim install mmdet3d
-
-# Copying the code
-COPY . /app
