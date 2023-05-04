@@ -26,23 +26,30 @@ cd mask_bev
 # Create virtual environment
 virtualenv --no-download venv
 source venv/bin/activate
+# or in tmp dir
+virtualenv --no-download $SLURM_TMPDIR/venv
+source $SLURM_TMPDIR/venv/bin/activate
 
 # Install requirements
 pip install -U pip
-pip install -r requirements_valeria.txt
+pip install -r requirements-valeria.txt
+
 # Install mmlabs packages
 # Be sure to activate the venv again after install openmim
 source venv/bin/activate
-mim install mmcv
-mim install mmdet
-mim install mmsegmentation
-mim install mmdet3d
+# or in tmp dir
+source $SLURM_TMPDIR/venv/bin/activate
+
+mim install mmcv==2.0.0
+mim install mmdet==3.0.0
+mim install mmsegmentation==1.0.0
+mim install mmdet3d==1.1.0
 ```
 
 Test it out
 
 ```shell
 # Start an interactive session
-salloc --account=ul-val-prj-def-phgig4 --cpus-per-task=8 --time=2:00:00 --gres=gpu:a100:1 --partition=gpu --mem=12G
+salloc --time=60:00 --cpus-per-task=4 --mem=12G --partition=gpu --gres=gpu:a100:1
 # TODO
 ```

@@ -1,6 +1,6 @@
 from typing import Callable
 
-import pipeline as pp
+import mask_bev.utils.pipeline as pp
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 from torch_waymo import WaymoDataset

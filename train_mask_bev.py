@@ -17,7 +17,7 @@ import pathlib
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import DeviceStatsMonitor, LearningRateMonitor, ModelCheckpoint, EarlyStopping
 from pytorch_lightning.loggers import TensorBoardLogger
-import pipeline as pp
+import mask_bev.utils.pipeline as pp
 
 from mask_bev.datasets.semantic_kitti.semantic_kitti_mask_data_module import SemanticKittiMaskDataModule
 

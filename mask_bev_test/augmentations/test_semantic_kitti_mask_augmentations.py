@@ -1,6 +1,6 @@
 import unittest
 
-import pipeline as pp
+import mask_bev.utils.pipeline as pp
 import pytorch_lightning as pl
 import torch
 from matplotlib import pyplot as plt

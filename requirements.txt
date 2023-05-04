@@ -10,7 +10,6 @@ vispy
 matplotlib
 cython
 jupyter
-git+https://github.com/willGuimont/pipeline
 torch_optimizer
 tk
 pillow-simd
