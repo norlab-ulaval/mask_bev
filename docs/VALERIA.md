@@ -48,5 +48,5 @@ Test it out
 salloc --time=60:00 --cpus-per-task=4 --mem=12G --partition=gpu --gres=gpu:a100:1
 cd mask_bev
 source venv/bin/activate
-# TODO
+python train_mask_bev.py --config configs/training/semantic_kitti/00_quick_test.yml
 ```
