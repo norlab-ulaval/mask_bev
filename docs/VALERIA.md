@@ -10,7 +10,7 @@ Also add symbolic links in `data/` to the datasets.
 
 ```shell
 # Load modules
-module load python/3.10
+module load python/3.9
 module load cuda/11.7
 module load qt
 module load geos
@@ -33,6 +33,7 @@ source $SLURM_TMPDIR/venv/bin/activate
 # Install requirements
 pip install -U pip
 pip install -r requirements-valeria.txt
+pip install --no-index -r requirements-valeria.txt
 
 # Install mmlabs packages
 # Be sure to activate the venv again after install openmim

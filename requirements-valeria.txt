@@ -11,12 +11,10 @@ matplotlib
 cython
 jupyter
 torch_optimizer
-tk
 pillow-simd
 tqdm
 torch_geometric
 einops
-scalene
 optuna
 SQLAlchemy
 openmim
