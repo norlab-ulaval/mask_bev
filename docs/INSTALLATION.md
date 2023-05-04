@@ -1,5 +1,8 @@
 # Installation
 
+Instructions for setting up a development environment for MaskBEV.
+For Valeria specific instructions, see [Valeria instructions](docs/VALERIA.md).
+
 Requires
 - Python 3.10
 

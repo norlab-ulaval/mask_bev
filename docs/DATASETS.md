@@ -1,5 +1,8 @@
 # Dataset preparation
 
+Instructions for preparing the datasets used in MaskBEV.
+For Valeria specific instructions, see [Valeria instructions](docs/VALERIA.md).
+
 ## SemanticKITTI
 Download the following files and extract them
 - [KITTI Odometry Benchmark Velodyne point clouds (80 GB)](https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_velodyne.zip)
