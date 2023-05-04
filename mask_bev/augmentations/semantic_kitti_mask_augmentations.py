@@ -4,7 +4,7 @@ from typing import Union, Tuple, Optional, Dict, List, Callable
 
 import numpy as np
 import torch
-from cv2 import cv2
+import cv2
 from torchvision.transforms import RandomErasing
 
 from mask_bev.augmentations.rand_augment import RandAugment
