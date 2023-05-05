@@ -5,6 +5,7 @@
 #SBATCH --partition=gpu
 #SBATCH --job-name=generate_masks
 #SBATCH --output=%x-%j.out
+#SBATCH --array=0-5
 
 # Load modules
 module load python/3.9
