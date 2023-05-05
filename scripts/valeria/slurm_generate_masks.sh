@@ -20,4 +20,4 @@ module load openblas
 # Start training
 cd ~/mask_bev
 source venv/bin/activate
-PYTHONPATH=. python scripts/generate_semantic_kitti_mask_cache.py
+PYTHONPATH="${PYTHONPATH}:." python scripts/generate_semantic_kitti_mask_cache.py
