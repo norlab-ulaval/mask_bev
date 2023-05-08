@@ -94,6 +94,8 @@ wget https://s3.eu-central-1.amazonaws.com/avg-kitti/data_object_calib.zip
 wget https://s3.eu-central-1.amazonaws.com/avg-kitti/data_object_label_2.zip
 # Dev kit for reference
 wget https://s3.eu-central-1.amazonaws.com/avg-kitti/devkit_object.zip
+# Sequence data
+wget https://s3.eu-central-1.amazonaws.com/avg-kitti/devkit_road_mapping.zip
 
 # Download splits
 wget -c  https://raw.githubusercontent.com/traveller59/second.pytorch/master/second/data/ImageSets/test.txt
