@@ -12,9 +12,13 @@ import yaml
 from PIL import Image
 from matplotlib import colors
 
+from mask_bev.datasets.semantic_kitti.semantic_kitti_mask_data_module import SemanticKittiMaskDataModule
+from mask_bev.mask_bev_module import MaskBevModule
+
 tracemalloc.start()
 
 
+# TODO clean up
 class TestFigures(unittest.TestCase):
     def test_semantic_kitti_2(self):
         plt.rcParams['figure.dpi'] = 450
@@ -35,7 +39,7 @@ class TestFigures(unittest.TestCase):
         config['batch_size'] = 1
         config['num_workers'] = 0
 
-        model = PointMaskModule.from_config(config, exp_name, checkpoint_folder_path)
+        model = MaskBevModule.from_config(config, exp_name, checkpoint_folder_path)
 
         datamodule = SemanticKittiMaskDataModule('data/SemanticKITTI', **config)
         gen_figs = True
@@ -909,3 +913,48 @@ class TestFigures(unittest.TestCase):
 
         fig.tight_layout()
         fig.show()
+
+    def test_weird_labels(self):
+        pl.seed_everything(123)
+
+        config_path = pathlib.Path('configs/old_training/semantic_kitti/21_point_mask_data_aug_gentle.yml')
+
+        # Load model
+        exp_name = config_path.stem
+        with open(config_path, 'r') as f:
+            config: dict = yaml.safe_load(f)
+        config['shuffle_train'] = False
+        config['batch_size'] = 1
+        config['num_workers'] = 0
+
+        datamodule = SemanticKittiMaskDataModule('data/SemanticKITTI', **config)
+        gen_figs = True
+
+        if gen_figs:
+            dataloader = datamodule.val_dataloader()
+            iterator = iter(dataloader)
+            for j in range(5):
+                # some good
+                # for i in range(23):
+                # some bad
+                # for i in range(18):
+                # for i in range(17):
+                # for i in range(15):
+                # for i in range(13):
+                # for i in range(50):
+                # for _ in range(4):
+                point_clouds, (labels_gt, masks_gt), _ = next(iterator)
+                instances_gt = torch.zeros((500, 500, 3))
+                for i, m in enumerate(masks_gt[0]):
+                    r = np.random.uniform(0, 1)
+                    g = np.random.uniform(0, 1)
+                    b = np.random.uniform(0, 1)
+                    instances_gt[m > 0, :] = 1
+
+                # Get mask and encoded point cloud
+                point_clouds[0]
+                gt_img = Image.fromarray(np.uint8(instances_gt[:, :] * 255))
+
+                # Plot
+                plt.imshow(instances_gt[:, :])
+                plt.show()
