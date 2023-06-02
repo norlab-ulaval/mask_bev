@@ -24,6 +24,6 @@ if __name__ == '__main__':
     mask_dataset = SemanticKittiMaskDataset(train_dataset, x_range, y_range, z_range, voxel_size, remove_unseen=True,
                                             min_points=1)
     num_masks = len(mask_dataset)
-    with multiprocessing.Pool(48, maxtasksperchild=1) as p:
+    with multiprocessing.Pool(32, maxtasksperchild=1) as p:
         iterator = tqdm.tqdm(p.imap_unordered(gen_mask, range(num_masks)), total=num_masks)
         print(f'Max number of instance per scan {max(iterator)}')
