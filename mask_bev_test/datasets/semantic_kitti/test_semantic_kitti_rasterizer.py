@@ -47,7 +47,6 @@ class TestSemanticKittiRasterizer(unittest.TestCase):
         plt.imshow(mask > 0)
         plt.show()
 
-
     @unittest.skip("graph")
     def test_density(self):
         c = collections.Counter()

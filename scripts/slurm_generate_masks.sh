@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=64
-#SBATCH --mem=12G
+#SBATCH --mem=64G
 #SBATCH --time=4-00:00
-#SBATCH --job-name=train_mask_bev
+#SBATCH --job-name=generate_masks
 #SBATCH --output=%x-%j.out
 
 # Load modules
@@ -20,4 +20,4 @@ module load openblas
 # Start training
 cd ~/mask_bev
 source venv/bin/activate
-python train_mask_bev.py --config configs/training/semantic_kitti/00_quick_test.yml
+PYTHONPATH=$(pwd):$PYTHONPATH python scripts/generate_semantic_kitti_mask_cache.py
