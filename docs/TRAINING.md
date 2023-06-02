@@ -26,3 +26,12 @@ docker run --gpus $CUDA_VISIBLE_DEVICES --rm -it \
   --mount type=bind,source=$(pwd)/data/Waymo,target=/app/data/Waymo \
   mask_bev python3.10 train_mask_bev.py --config /app/configs/training/$CONFIG
 ```
+
+## Train with sjm
+
+Install [willGuimont/sjm](https://github.com/willGuimont/sjm).
+
+```shell
+sjm pull exx mask_bev
+sjm run exx slurm_train.sh NAME=remove_partial_instances CONFIG=...
+```

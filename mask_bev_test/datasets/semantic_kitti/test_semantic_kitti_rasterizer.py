@@ -39,6 +39,15 @@ class TestSemanticKittiRasterizer(unittest.TestCase):
         present_classes_in_scan.add(0)  # no instance
         self._assert_only_instances(present_classes_in_scan, mask)
 
+    def test_weird_masks(self):
+        scan, scene = self._make_scene(0, 10, 5)
+        rasterizer = SemanticKittiRasterizer((-40, 40), (-40, 40), (-10, 10), 0.1)
+        mask = rasterizer.get_mask_around(scan, scene)
+
+        plt.imshow(mask > 0)
+        plt.show()
+
+
     @unittest.skip("graph")
     def test_density(self):
         c = collections.Counter()
