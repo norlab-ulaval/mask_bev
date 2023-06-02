@@ -23,4 +23,4 @@ RUN mim install mmcv
 RUN mim install mmdet
 RUN mim install mmsegmentation
 RUN mim install mmdet3d
-RUN export PYTHONPATH=/app:$PYTHONPATH
+ENV PYTHONPATH=/app:$PYTHONPATH
