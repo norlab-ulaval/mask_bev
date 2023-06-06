@@ -1,17 +1,18 @@
 import time
 from typing import Callable
 
-import mask_bev.utils.pipeline as pp
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 
+import mask_bev.utils.pipeline as pp
 from mask_bev.datasets.apply_transform import ApplyTransform
 from mask_bev.datasets.collate_type import CollateType
 from mask_bev.datasets.semantic_kitti.semantic_kitti_dataset import SemanticKittiSequenceDataset, \
     SemanticKittiRawLabel
 from mask_bev.datasets.semantic_kitti.semantic_kitti_mask_dataset import SemanticKittiMaskDataset
 from mask_bev.datasets.semantic_kitti.semantic_kitti_transforms import MaskScanToPointCloud, MaskScanToMask, \
-    MaskListCollateHeight, MaskTensorCollate, ShufflePointCloud, MaskToLabelInstanceMasks, FrameMetaData
+    MaskListCollateHeight, MaskTensorCollate, ShufflePointCloud, MaskToLabelInstanceMasks, FrameMetaData, \
+    LabelMaskToMask2FormerLabel
 
 
 # TODO Unify with other data modules
@@ -20,7 +21,7 @@ class SemanticKittiMaskDataModule(pl.LightningDataModule):
                  y_range: (int, int), z_range: (int, int), voxel_size: float, remove_unseen: bool,
                  num_workers: int = 8, pin_memory: bool = True, collate_fn: CollateType = CollateType.ListCollate,
                  shuffle_train: bool = True, dataset_transform: Callable = None, predict_heights: bool = False,
-                 **kwargs):
+                 head_num_classes: int = 1, **kwargs):
         """
         Pytorch lightning wrapper around SemanticKittiMaskDataset
         :param root_path: root path of the dataset
@@ -45,6 +46,7 @@ class SemanticKittiMaskDataModule(pl.LightningDataModule):
         self._shuffle_train = shuffle_train
         self._dataset_transform = dataset_transform
         self._predict_heights = predict_heights
+        self._num_classes = head_num_classes
 
         included_labels = [SemanticKittiRawLabel.CAR]
 
@@ -90,6 +92,7 @@ class SemanticKittiMaskDataModule(pl.LightningDataModule):
                 pp.Second(pp.Compose([
                     MaskScanToMask(),
                     MaskToLabelInstanceMasks(self._num_queries),
+                    LabelMaskToMask2FormerLabel(self._num_classes),
                 ])),
                 pp.Third(pp.Compose([
                     FrameMetaData(),
@@ -106,6 +109,7 @@ class SemanticKittiMaskDataModule(pl.LightningDataModule):
                 pp.Second(pp.Compose([
                     MaskScanToMask(),
                     MaskToLabelInstanceMasks(self._num_queries),
+                    LabelMaskToMask2FormerLabel(self._num_classes),
                 ])),
             ])
 

@@ -18,7 +18,7 @@ class TestMaskAugmentations(unittest.TestCase):
         self.batch_size = 1
         self.x_range, self.y_range, self.z_range, self.voxel_size = (-40, 40), (-40, 40), (-10, 10), 0.16
 
-    # @unittest.skip('plot')
+    @unittest.skip('plot')
     def test_flip_x(self):
         flip_x = Flip(prob_flip_x=1, prob_flip_y=0)
         self._run_with_augmentation(flip_x)

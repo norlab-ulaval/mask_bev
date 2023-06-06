@@ -68,6 +68,16 @@ class FrameMasksToLabelInstanceMasks:
         return labels, out_mask
 
 
+class LabelMaskToMask2FormerLabel:
+    def __init__(self, num_classes: int):
+        self._num_classes = num_classes
+
+    def __call__(self, x: tuple[torch.Tensor, torch.Tensor]):
+        labels, masks = x
+        labels = self._num_classes - labels
+        return labels, masks
+
+
 class FrameMaskListCollate:
     def __call__(self, batch):
         """

@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from mmdet.models.utils import multi_apply
+from mmengine.structures import InstanceData
 from torch import nn
 
 from mask_bev.datasets.kitti.kitti_transforms import Difficulty
@@ -33,7 +34,41 @@ class MaskBevPanopticHead(nn.Module):
         img_meta = [{} for i in range(cls[0].shape[0])]
         return self._panoptic_head.loss(cls, masks, label_gt, masks_gt, img_meta, heights_pred, heights_gt)
 
-    # TODO review average precision
+    def mAP(self, cls, masks, labels_gt, masks_gt, cls_metric: BinaryClassifMapMetric, mask_metric: DetectionMapMetric,
+            mIoU_metric: MeanIoU):
+        """
+        Computes the mAP for the given batch
+        :param cls: class predictions (list of tensors (B, N, C), one item per decoder layer)
+        :param masks: mask predictions (list of tensors (B, N, H, W), one item per decoder layer)
+        :param labels_gt: labels ground truth (B, N)
+        :param masks_gt: masks ground truth (B, N, H, W)
+        :param cls_metric: class metric
+        :param mask_metric: mask metric
+        :param mIoU_metric: mIoU metric
+        :return: mAP
+        """
+        # Keep last layer only
+        cls = cls[-1]
+        masks = masks[-1]
+
+        # Build gt instances and img meta
+        batch_size = cls.size(0)
+        img_meta = [{} for _ in range(batch_size)]
+
+        # Get targets
+        all_label_targets = []
+        all_mask_targets = []
+
+        for i in range(batch_size):
+            batch_cls = cls[i]
+            batch_masks = masks[i]
+            batch_gt_instances = InstanceData(labels=labels_gt[i], masks=masks_gt[i])
+            batch_img_meta = img_meta[i]
+            labels, label_weights, mask_targets, mask_weights, pos_inds, neg_inds, sampling_result = self._panoptic_head._get_targets_single(
+                batch_cls, batch_masks, batch_gt_instances, batch_img_meta, None)
+            print(labels)
+
+
     def add_average_precision(self, cls_metric: BinaryClassifMapMetric, height_metric: DetectionMapMetric,
                               mask_metric: DetectionMapMetric, cls_pred_score,
                               masks_pred, label_gt, mask_gt, heights_pred, heights_gt, metadata=None,
@@ -277,9 +312,6 @@ class MaskBevPanopticHead(nn.Module):
             is_mask_respect = ious >= iou_threshold
             is_true_positive = torch.bitwise_and(is_true_positive, is_mask_respect)
             all_metric[i].update(confidences, is_true_positive, num_instances)
-
-    def _compute_point_mIoU(self):
-        ...
 
     def _get_config(self, num_things_classes, num_stuff_classes, num_queries, in_channels, head_feat_channels,
                     head_out_channels, reverse_class_weights):

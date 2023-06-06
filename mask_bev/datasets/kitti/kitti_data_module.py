@@ -2,17 +2,17 @@ import pathlib
 import random
 from typing import Callable
 
-import mask_bev.utils.pipeline as pp
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader, Subset
 
+import mask_bev.utils.pipeline as pp
 from mask_bev.datasets.apply_transform import ApplyTransform
 from mask_bev.datasets.collate_type import CollateType
 from mask_bev.datasets.kitti.kitti_dataset import KittiDataset
 from mask_bev.datasets.kitti.kitti_transforms import FrameMaskListCollate, FrameMaskTensorCollate, FrameToPointCloud, \
     ShufflePointCloud, FrameScanToMask, FrameMasksToLabelInstanceMasks, FrameMetaData, FrameDifficulty, \
     FrameRoundedHeight, \
-    FilterLabelDifficulty, ObjectRangeFilter
+    FilterLabelDifficulty, ObjectRangeFilter, LabelMaskToMask2FormerLabel
 
 
 # TODO unify with other DataModules
@@ -21,7 +21,7 @@ class KittiDataModule(pl.LightningDataModule):
                  y_range: (int, int), z_range: (int, int), voxel_size: float, remove_unseen: bool,
                  num_workers: int = 8, pin_memory: bool = True, collate_fn: CollateType = CollateType.ListCollate,
                  shuffle_train: bool = True, frame_transform: Callable = None, mask_transform: Callable = None,
-                 filter_difficulty: bool = False, **kwargs):
+                 filter_difficulty: bool = False, head_num_classes: int = 1, **kwargs):
         """
         Pytorch lightning wrapper around WaymoDataset
         :param root_path: root path of the dataset
@@ -48,6 +48,7 @@ class KittiDataModule(pl.LightningDataModule):
         self._frame_transform = frame_transform if frame_transform is not None else pp.Identity()
         self._mask_transform = mask_transform if mask_transform is not None else pp.Identity()
         self._filter_difficulty = filter_difficulty
+        self._num_classes = head_num_classes
 
         self._dataset = KittiDataset(root_path, 'training')
 
@@ -93,6 +94,7 @@ class KittiDataModule(pl.LightningDataModule):
                 FrameScanToMask(self._x_range, self._y_range, self._z_range, self._voxel_size, self._min_num_points,
                                 self._remove_unseen),
                 FrameMasksToLabelInstanceMasks(self._num_queries),
+                LabelMaskToMask2FormerLabel(self._num_classes),
                 self._mask_transform,
             ])),
             pp.Third(pp.Compose([
