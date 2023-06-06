@@ -2,6 +2,7 @@ import tracemalloc
 import unittest
 
 import torch
+from torchmetrics.detection import MeanAveragePrecision
 
 from mask_bev.evaluation.detection_metric import BinaryClassifMapMetric, DetectionMapMetric, MeanIoU
 from mask_bev.models.head.mask_bev_panoptic_head import MaskBevPanopticHead
@@ -21,8 +22,8 @@ class TestMaskBevPanopticHead(unittest.TestCase):
         self.mask_gt = torch.randn((self.batch_size, 160, 160))
         num_classes = 2
         self.num_gt = 10
-        self.labels_gt = torch.ones(size=(self.batch_size, self.num_gt), dtype=torch.long)
-        self.masks_gt = torch.randn((self.batch_size, self.num_gt, 160, 160))
+        self.labels_gt = torch.zeros(size=(self.batch_size, self.num_gt), dtype=torch.long)
+        self.masks_gt = torch.randint(low=0, high=1, size=(self.batch_size, self.num_gt, 160, 160))
         self.heights_gt = torch.randn((self.batch_size, self.num_gt))
 
     def test_panoptic_head(self):
@@ -44,9 +45,11 @@ class TestMaskBevPanopticHead(unittest.TestCase):
     def test_mAP(self):
         cls, masks, _ = self.panoptic_head(self.backbone_out)
         cls_metric = BinaryClassifMapMetric()
-        mask_metric = DetectionMapMetric()
+
+        max_det = self.num_queries * self.batch_size
+        map_metric = MeanAveragePrecision(iou_type='segm', max_det=max_det)
         mIoU_metric = MeanIoU()
 
-        mAP = self.panoptic_head.mAP(cls, masks, self.labels_gt, self.masks_gt, cls_metric, mask_metric, mIoU_metric)
+        mAP = self.panoptic_head.mAP(cls, masks, self.labels_gt, self.masks_gt, cls_metric, map_metric, mIoU_metric)
 
         self.assertTrue(isinstance(mAP, dict))

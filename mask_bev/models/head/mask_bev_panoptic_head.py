@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from mmdet.models.utils import multi_apply
 from mmengine.structures import InstanceData
 from torch import nn
+from torchmetrics.detection import MeanAveragePrecision
 
 from mask_bev.datasets.kitti.kitti_transforms import Difficulty
 from mask_bev.evaluation.average_precision import batched_mask_iou, rot_mask_iou
@@ -22,6 +23,7 @@ class MaskBevPanopticHead(nn.Module):
         super().__init__()
         config = self._get_config(num_classes, 0, num_queries, in_channels, feat_channels, out_channels,
                                   reverse_class_weights)
+        self._num_classes = num_classes
         self._predict_height = predict_height
         self._panoptic_head = Mask2FormerHead(**config, predict_height=self._predict_height)
         self._panoptic_head.init_weights()
@@ -34,12 +36,13 @@ class MaskBevPanopticHead(nn.Module):
         img_meta = [{} for i in range(cls[0].shape[0])]
         return self._panoptic_head.loss(cls, masks, label_gt, masks_gt, img_meta, heights_pred, heights_gt)
 
-    def mAP(self, cls, masks, labels_gt, masks_gt, cls_metric: BinaryClassifMapMetric, mask_metric: DetectionMapMetric,
+    def mAP(self, pred_cls, pred_masks, labels_gt, masks_gt, cls_metric: BinaryClassifMapMetric,
+            map_metric: MeanAveragePrecision,
             mIoU_metric: MeanIoU):
         """
         Computes the mAP for the given batch
-        :param cls: class predictions (list of tensors (B, N, C), one item per decoder layer)
-        :param masks: mask predictions (list of tensors (B, N, H, W), one item per decoder layer)
+        :param pred_cls: class predictions (list of tensors (B, N, C), one item per decoder layer)
+        :param pred_masks: mask predictions (list of tensors (B, N, H, W), one item per decoder layer)
         :param labels_gt: labels ground truth (B, N)
         :param masks_gt: masks ground truth (B, N, H, W)
         :param cls_metric: class metric
@@ -48,26 +51,51 @@ class MaskBevPanopticHead(nn.Module):
         :return: mAP
         """
         # Keep last layer only
-        cls = cls[-1]
-        masks = masks[-1]
+        pred_cls = pred_cls[-1]
+        pred_masks = pred_masks[-1]
 
         # Build gt instances and img meta
-        batch_size = cls.size(0)
+        batch_size = pred_cls.size(0)
         img_meta = [{} for _ in range(batch_size)]
 
         # Get targets
-        all_label_targets = []
-        all_mask_targets = []
+        gt_per_image = []
+        pred_per_image = []
 
         for i in range(batch_size):
-            batch_cls = cls[i]
-            batch_masks = masks[i]
+            batch_pred_cls = pred_cls[i]
+            batch_pred_masks = pred_masks[i]
             batch_gt_instances = InstanceData(labels=labels_gt[i], masks=masks_gt[i])
             batch_img_meta = img_meta[i]
             labels, label_weights, mask_targets, mask_weights, pos_inds, neg_inds, sampling_result = self._panoptic_head._get_targets_single(
-                batch_cls, batch_masks, batch_gt_instances, batch_img_meta, None)
-            print(labels)
+                batch_pred_cls, batch_pred_masks, batch_gt_instances, batch_img_meta, None)
 
+            # TODO support multiple cls
+            evaluated_class = 0
+            pred_softmax = batch_pred_cls.softmax(dim=-1)
+            y_scores = pred_softmax[:, evaluated_class]
+            y_pred = self._num_classes - batch_pred_cls.argmax(dim=-1)
+            y_true = self._num_classes - labels
+
+            # Classification metric
+            cls_metric.update(y_scores, y_true)
+
+            # Upscale masks to target dim
+            batch_pred_masks_to_target_dim = F.interpolate(batch_pred_masks.unsqueeze(1),
+                                                           mask_targets.shape[1:], mode='bilinear',
+                                                           align_corners=False).squeeze(1)
+            batch_pred_masks_to_target_dim_pos = batch_pred_masks_to_target_dim[pos_inds]
+            batch_pred_masks_to_target_dim_pos = torch.sigmoid(batch_pred_masks_to_target_dim_pos) > 0.5
+
+            # IoU metric
+            ious = batched_mask_iou(mask_targets, batch_pred_masks_to_target_dim_pos)
+            mIoU_metric.update(ious)
+
+            # mAP metric
+            preds = [dict(boxes=None, scores=y_scores, labels=y_pred, masks=batch_pred_masks_to_target_dim)]
+            # TODO make this metric work. labels and mask_targets should have the same shape
+            target = [dict(boxes=None, labels=labels, masks=mask_targets)]
+            map_metric.update(preds, target)
 
     def add_average_precision(self, cls_metric: BinaryClassifMapMetric, height_metric: DetectionMapMetric,
                               mask_metric: DetectionMapMetric, cls_pred_score,

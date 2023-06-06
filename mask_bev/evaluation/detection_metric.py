@@ -25,7 +25,7 @@ class BinaryClassifMapMetric(Metric):
             return 0.0
         y_score = torch.cat(self.y_score)
         y_true = torch.cat(self.y_true)
-        return MF.classification.binary_average_precision(y_score[:, 1], y_true, thresholds=11)
+        return MF.classification.binary_average_precision(y_score, y_true, thresholds=11)
 
 
 class ClassifMapMetric(Metric):

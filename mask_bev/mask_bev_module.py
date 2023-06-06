@@ -82,6 +82,7 @@ class MaskBevModule(pl.LightningModule):
         self._train_cls_map = BinaryClassifMapMetric()
         self._train_height_map = DetectionMapMetric() if self._predict_heights else None
         # self._train_cls_map = DetectionMapMetric()
+        raise ValueError('TODO: change to MeanAveragePrecision')
         self._train_mask_map_all = [DetectionMapMetric() for _ in range(10)]
         self._train_mask_map = DetectionMapMetric()
         self._train_easy_map = DetectionMapMetric()
