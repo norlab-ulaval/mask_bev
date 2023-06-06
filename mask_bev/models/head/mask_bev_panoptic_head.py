@@ -62,11 +62,13 @@ class MaskBevPanopticHead(nn.Module):
         gt_per_image = []
         pred_per_image = []
 
-        for i in range(batch_size):
-            batch_pred_cls = pred_cls[i]
-            batch_pred_masks = pred_masks[i]
-            batch_gt_instances = InstanceData(labels=labels_gt[i], masks=masks_gt[i])
-            batch_img_meta = img_meta[i]
+        for sample_idx in range(batch_size):
+            batch_pred_cls = pred_cls[sample_idx]
+            batch_pred_masks = pred_masks[sample_idx]
+            batch_labels_gt = labels_gt[sample_idx]
+            batch_masks_gt = masks_gt[sample_idx]
+            batch_gt_instances = InstanceData(labels=batch_labels_gt, masks=batch_masks_gt)
+            batch_img_meta = img_meta[sample_idx]
             labels, label_weights, mask_targets, mask_weights, pos_inds, neg_inds, sampling_result = self._panoptic_head._get_targets_single(
                 batch_pred_cls, batch_pred_masks, batch_gt_instances, batch_img_meta, None)
 
@@ -92,9 +94,10 @@ class MaskBevPanopticHead(nn.Module):
             mIoU_metric.update(ious)
 
             # mAP metric
+            batch_pred_masks_to_target_dim = (torch.sigmoid(batch_pred_masks_to_target_dim) > 0.5)
             preds = [dict(boxes=None, scores=y_scores, labels=y_pred, masks=batch_pred_masks_to_target_dim)]
             # TODO make this metric work. labels and mask_targets should have the same shape
-            target = [dict(boxes=None, labels=labels, masks=mask_targets)]
+            target = [dict(boxes=None, labels=batch_labels_gt, masks=batch_masks_gt)]
             map_metric.update(preds, target)
 
     def add_average_precision(self, cls_metric: BinaryClassifMapMetric, height_metric: DetectionMapMetric,
