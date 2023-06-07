@@ -1,0 +1,58 @@
+# General
+seed: 420
+checkpoint:
+
+# Model
+lr: 1.0e-4
+weight_decay: 1.0e-4
+optimiser_type: adam_w
+lr_schedulers_type: plateau
+differential_lr: False
+differential_lr_scaling: 0.1
+x_range: [ -40, 40 ]
+y_range: [ -40, 40 ]
+z_range: [ -20, 20 ]
+voxel_size: 0.16
+num_queries: 10
+
+# Encoder
+pc_point_dim: 3
+max_num_points: 32
+encoder_feat_channels: [ 128, 128, 128 ]
+
+# Backbone
+backbone_embed_dim: 192
+head_feat_channels: 256
+head_out_channels: 256
+
+# Head
+head_num_classes: 2
+
+# Dataset
+dataset: waymo
+batch_size: 1
+num_workers: 0
+pin_memory: True
+remove_unseen: True
+min_num_points: 1
+
+shuffle_train: False
+limit_train_batches: 1
+limit_val_batches: 0
+log_every_n_steps: 1
+augmentations:
+  - name: 'drop'
+    prob_drop: 0.5
+    per_point_drop_prob: 0.05
+  - name: 'flip'
+    prob_flip_x: 0
+    prob_flip_y: 0.5
+  - name: 'shuffle'
+    prob_shuffle: 0
+  - name: 'rotate'
+    rotate_prob: 0.5
+    rotation_range: 5
+  - name: 'jitter'
+    prob_jitter: 0.5
+    jitter_std: 0.02
+    intensity_std: 0.01

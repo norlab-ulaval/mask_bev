@@ -1,0 +1,71 @@
+# General
+seed: 420
+
+# Model
+# from maskformer (CNN)
+#checkpoint: /home/william/exx_backup/checkpoints/01_point_mask/01_point_mask-epoch=10-val_loss=5.438405.ckpt
+lr: 1.0e-4
+weight_decay: 1.0e-4
+# lr = 1.0e-4 / 4
+# from maskformer (swin)
+# lr = 6.0e-5
+# weight_decay = 1.0e-2
+# from mask2former
+# lr = 1.0e-4
+# weight_decay = 5.0e-2
+optimiser_type: adam_w
+lr_schedulers_type: plateau
+differential_lr: False
+differential_lr_scaling: 0.1
+x_range: [ -40, 40 ]
+y_range: [ -40, 40 ]
+z_range: [ -20, 20 ]
+voxel_size: 0.16
+num_queries: 50
+predict_heights: False
+
+# Encoder
+max_num_points: 32
+encoder_feat_channels: [ 128, 128, 128 ]
+encoder_encoding_type: vanilla
+encoder_fourier_enc_group: 1
+
+# Backbone
+#backbone_patch_size: 6
+#backbone_strides: [ 6, 2, 2, 2 ]
+#backbone_window_size: 16
+backbone_embed_dim: 192
+backbone_use_abs_emb: True
+
+# Head
+head_feat_channels: 256
+head_out_channels: 256
+head_reverse_class_weights: True
+
+# Dataset
+dataset: kitti
+batch_size: 1
+num_workers: 0
+pin_memory: True
+remove_unseen: True
+shuffle_train: False
+min_num_points: 1
+limit_train_batches: 1
+limit_val_batches: 10000
+#log_every_n_steps: 1
+#augmentations:
+#  - name: 'drop'
+#    prob_drop: 0.5
+#    per_point_drop_prob: 0.05
+#  - name: 'flip'
+#    prob_flip_x: 0.5
+#    prob_flip_y: 0.5
+#  - name: 'shuffle'
+#    prob_shuffle: 0.5
+#  - name: 'rotate'
+#    rotate_prob: 0.5
+#    rotation_range: 180
+#  - name: 'jitter'
+#    prob_jitter: 0.5
+#    jitter_std: 0.02
+#    intensity_std: 0.01
