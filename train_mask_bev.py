@@ -63,6 +63,7 @@ if __name__ == '__main__':
 
     check_metric = 'val_loss' if limit_val_batches > 0 else 'train_loss'
     available_gpu = [int(x) for x in os.environ.get('CUDA_VISIBLE_DEVICES', '0').split(',')]
+    print(f'Using GPUs {available_gpu}')
     trainer = pl.Trainer(accelerator='gpu', devices=available_gpu, precision=32, logger=logger,
                          min_epochs=0, max_epochs=1000,
                          log_every_n_steps=log_every_n_steps,
