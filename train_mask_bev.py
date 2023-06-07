@@ -1,5 +1,6 @@
 import argparse
 import os
+import subprocess
 import sys
 
 import yaml
@@ -64,6 +65,8 @@ if __name__ == '__main__':
     check_metric = 'val_loss' if limit_val_batches > 0 else 'train_loss'
     num_gpus = len(os.environ.get('CUDA_VISIBLE_DEVICES', '0').split(','))
     available_gpu = list(range(num_gpus))
+    commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+    print(f'Running at commit {commit_hash}')
     print(f'Using GPUs {available_gpu}')
     trainer = pl.Trainer(accelerator='gpu', devices=available_gpu, precision=32, logger=logger,
                          min_epochs=0, max_epochs=1000,
