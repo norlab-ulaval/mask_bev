@@ -49,8 +49,8 @@ pin_memory: True
 remove_unseen: True
 shuffle_train: False
 min_num_points: 1
-#limit_train_batches: 1
-#limit_val_batches: 0
+limit_train_batches: 1
+limit_val_batches: 1
 log_every_n_steps: 1
 #augmentations:
 #  - name: 'drop'

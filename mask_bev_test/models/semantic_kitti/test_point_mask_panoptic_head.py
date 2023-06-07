@@ -50,6 +50,7 @@ class TestMaskBevPanopticHead(unittest.TestCase):
         map_metric = MeanAveragePrecision(iou_type='segm', max_det=max_det)
         mIoU_metric = MeanIoU()
 
-        mAP = self.panoptic_head.mAP(cls, masks, self.labels_gt, self.masks_gt, cls_metric, map_metric, mIoU_metric)
+        self.panoptic_head.update_mAP_metrics(cls, masks, self.labels_gt, self.masks_gt, cls_metric, map_metric, mIoU_metric)
 
+        mAP = map_metric.compute()
         self.assertTrue(isinstance(mAP, dict))
