@@ -129,19 +129,19 @@ class SemanticKittiMaskDataset(Dataset):
     def _get_cached(self, scan):
         mask_path = self._cache_of_scan(scan)
         if mask_path.exists():
-            mask = np.loadtxt(str(mask_path))
+            mask = np.load(str(mask_path))
             return mask
         return None
 
     def _cache_mask(self, mask, scan):
         mask_path = self._cache_of_scan(scan)
         mask_path.parent.mkdir(parents=True, exist_ok=True)
-        np.savetxt(str(mask_path), mask)
+        np.save(str(mask_path), mask)
 
     def _cache_of_scan(self, scan) -> pathlib.Path:
         seq_number = scan.seq_number
         scan_number = scan.scan_number
-        return self._cache_path.joinpath(str(seq_number)).joinpath(f'{scan_number}.txt')
+        return self._cache_path.joinpath(str(seq_number)).joinpath(f'{scan_number}.npy')
 
 
 if __name__ == '__main__':
