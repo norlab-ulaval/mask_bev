@@ -28,7 +28,7 @@ head_out_channels: 256
 
 # Dataset
 batch_size: 4
-num_workers: 4
+num_workers: 6
 pin_memory: True
 remove_unseen: True
 shuffle_train: True
