@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 import yaml
 
@@ -61,7 +62,8 @@ if __name__ == '__main__':
     log_every_n_steps = config.get('log_every_n_steps', 50)
 
     check_metric = 'val_loss' if limit_val_batches > 0 else 'train_loss'
-    trainer = pl.Trainer(accelerator='gpu', devices=[0], precision=32, logger=logger,
+    available_gpu = [int(x) for x in os.environ.get('CUDA_VISIBLE_DEVICES', '0').split(',')]
+    trainer = pl.Trainer(accelerator='gpu', devices=available_gpu, precision=32, logger=logger,
                          min_epochs=0, max_epochs=1000,
                          log_every_n_steps=log_every_n_steps,
                          limit_train_batches=limit_train_batches, limit_val_batches=limit_val_batches,
