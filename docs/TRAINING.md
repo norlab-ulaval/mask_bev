@@ -20,7 +20,7 @@ CONFIG=<path/to/config>  # for example `semantic_kitti/00_quick_test.yml`
 CUDA_VISIBLE_DEVICES=all  # or `0,1` for specific GPUs, will be automatically set by SLURM
 
 docker run --gpus all -e CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES --rm -it \
-  --mount type=bind,source=.,target=/app/ \
+  --mount type=bind,source=$(pwd),target=/app/ \
   --mount type=bind,source=$(pwd)/data/SemanticKITTI,target=/app/data/SemanticKITTI \
   --mount type=bind,source=$(pwd)/data/KITTI,target=/app/data/KITTI \
   --mount type=bind,source=$(pwd)/data/Waymo,target=/app/data/Waymo \
