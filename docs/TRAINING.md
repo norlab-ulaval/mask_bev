@@ -34,5 +34,5 @@ Install [willGuimont/sjm](https://github.com/willGuimont/sjm).
 
 ```shell
 sjm pull exx mask_bev
-sjm run exx slurm_train.sh NAME=remove_partial_instances CONFIG=configs/training/semantic_kitti/01_point_mask_data_aug_gentle.yml
+sjm run exx slurm_train.sh NAME=experiment_name CONFIG=configs/training/config_path.yml
 ```
