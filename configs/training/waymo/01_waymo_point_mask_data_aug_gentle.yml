@@ -1,6 +1,6 @@
 # General
 seed: 420
-checkpoint: /home/wigum/point_mask/checkpoints/04_waymo_point_mask_data_aug_gentle_higher_lr/last.ckpt
+checkpoint:
 
 # Model
 lr: 1.0e-4
