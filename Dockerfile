@@ -1,5 +1,9 @@
 FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
 
+# Set the current timezone
+ENV TZ=America/Toronto
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 # Install python and dependencies
 RUN apt-get update && apt-get -y install software-properties-common && add-apt-repository -y ppa:deadsnakes/ppa && apt-get update
 RUN apt-get install -y git ninja-build nvidia-cuda-toolkit libjpeg-dev zlib1g-dev libopenblas-dev
