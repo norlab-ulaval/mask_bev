@@ -164,7 +164,7 @@ class TestFigures(unittest.TestCase):
         sample_idx = 0
         pl.seed_everything(45)
 
-        config_path = pathlib.Path('configs/kitti/72_kitti_point_mask_lower_lr_no_abs.yml')
+        config_path = pathlib.Path('configs/kitti/02_kitti_point_mask_lower_lr_no_abs.yml')
         checkpoint = pathlib.Path(
             '/home/william/Datasets/checkpoints/72_kitti_point_mask_lower_lr_no_abs/72_kitti_point_mask_lower_lr_no_abs-epoch=63-val_loss=4.438325.ckpt')
 
@@ -290,7 +290,7 @@ class TestFigures(unittest.TestCase):
         sample_idx = 0
         pl.seed_everything(45)
 
-        config_path = pathlib.Path('configs/kitti/72_kitti_point_mask_lower_lr_no_abs.yml')
+        config_path = pathlib.Path('configs/kitti/02_kitti_point_mask_lower_lr_no_abs.yml')
         checkpoint = pathlib.Path(
             '/home/william/Datasets/checkpoints/72_kitti_point_mask_lower_lr_no_abs/72_kitti_point_mask_lower_lr_no_abs-epoch=63-val_loss=4.438325.ckpt')
 

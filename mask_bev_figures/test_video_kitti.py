@@ -233,7 +233,7 @@ class TestVideoKITTI(unittest.TestCase):
         sample_idx = 0
         pl.seed_everything(45)
 
-        config_path = pathlib.Path('configs/old_training/kitti/72_kitti_point_mask_lower_lr_no_abs.yml')
+        config_path = pathlib.Path('configs/old_training/kitti/02_kitti_point_mask_lower_lr_no_abs.yml')
         # Load model
         exp_name = config_path.stem
         checkpoint_folder_path = pathlib.Path('checkpoints').joinpath(exp_name)
