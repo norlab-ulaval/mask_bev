@@ -8,6 +8,8 @@
 # Start training
 cd ~/mask_bev
 docker build -t mask_bev .
+ls
+ls scripts
 docker run --gpus all -e CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES -e DOCKER=1 --rm \
   --mount type=bind,source="$(pwd)",target=/app/ \
   --mount type=bind,source="$(pwd)"/data/SemanticKITTI,target=/app/data/SemanticKITTI \
