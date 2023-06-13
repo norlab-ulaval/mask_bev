@@ -14,14 +14,14 @@ from mask_bev.datasets.waymo.waymo_transforms import FrameMaskListCollate, Frame
 
 # TODO unify with other data modules
 class WaymoDataModule(pl.LightningDataModule):
-    def __init__(self, server_url: str, batch_size: int, min_num_points: int, num_queries: int, x_range: (int, int),
+    def __init__(self, dataset_root: str, batch_size: int, min_num_points: int, num_queries: int, x_range: (int, int),
                  y_range: (int, int), z_range: (int, int), voxel_size: float, remove_unseen: bool,
                  num_workers: int = 8, pin_memory: bool = True, collate_fn: CollateType = CollateType.ListCollate,
                  shuffle_train: bool = True, frame_transform: Callable = None, mask_transform: Callable = None,
                  head_num_classes: int = 1, **kwargs):
         """
         Pytorch lightning wrapper around WaymoDataset
-        :param server_url: root path of the dataset
+        :param dataset_root: root path of the dataset
         :param batch_size: mini-batch size
         :param min_num_points: minimum number of points to be considered seen
         :param num_workers: number of workers for the data preparation (0 to disable multi-process)
@@ -45,8 +45,8 @@ class WaymoDataModule(pl.LightningDataModule):
         self._mask_transform = mask_transform if mask_transform is not None else pp.Identity()
         self._num_classes = head_num_classes
 
-        self._train_dataset = WaymoDataset(server_url, 'training')
-        self._valid_dataset = WaymoDataset(server_url, 'validation')
+        self._train_dataset = WaymoDataset(dataset_root, 'training')
+        self._valid_dataset = WaymoDataset(dataset_root, 'validation')
 
         transform_to_pair = self._build_transform()
 
