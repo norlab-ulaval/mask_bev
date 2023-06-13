@@ -30,8 +30,8 @@ head_num_classes: 2
 
 # Dataset
 dataset: waymo
-batch_size: 4
-num_workers: 0
+batch_size: 2
+num_workers: 2
 pin_memory: True
 remove_unseen: True
 shuffle_train: True
