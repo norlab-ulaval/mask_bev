@@ -47,7 +47,7 @@ if __name__ == '__main__':
     elif dataset_name == 'waymo':
         frame_aug = pp.Compose(make_waymo_augmentation_list(augmentations_list))
         mask_aug = lambda x: x
-        datamodule = WaymoDataModule('data/Waymo', frame_transform=frame_aug, mask_transform=mask_aug,
+        datamodule = WaymoDataModule('data/Waymo/converted', frame_transform=frame_aug, mask_transform=mask_aug,
                                      **config)
     elif dataset_name == 'kitti':
         frame_aug = pp.Compose(make_kitti_augmentation_list(augmentations_list))
