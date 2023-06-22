@@ -2,17 +2,9 @@
 seed: 420
 
 # Model
-# from maskformer (CNN)
-#checkpoint: /home/william/exx_backup/checkpoints/01_point_mask/01_point_mask-epoch=10-val_loss=5.438405.ckpt
+#checkpoint: last
 lr: 1.0e-4
-weight_decay: 1.0e-4
-# lr = 1.0e-4 / 4
-# from maskformer (swin)
-# lr = 6.0e-5
-# weight_decay = 1.0e-2
-# from mask2former
-# lr = 1.0e-4
-# weight_decay = 5.0e-2
+weight_decay: 0
 optimiser_type: adam_w
 lr_schedulers_type: plateau
 differential_lr: False
@@ -43,7 +35,7 @@ head_out_channels: 256
 head_reverse_class_weights: True
 
 # Dataset
-min_num_inst_pixels: 300
+min_num_inst_pixels: 200
 batch_size: 1
 num_workers: 0
 pin_memory: True

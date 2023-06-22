@@ -76,7 +76,7 @@ class WaymoDataModule(pl.LightningDataModule):
                 FrameScanToMask(self._x_range, self._y_range, self._z_range, self._voxel_size, self._min_num_points,
                                 self._remove_unseen),
                 FrameMasksToLabelInstanceMasks(self._num_queries),
-                LabelMaskToMask2FormerLabel(self._num_classes),
+                # LabelMaskToMask2FormerLabel(self._num_classes),
             ])),
             pp.Third(pp.Compose([
                 FrameMetaData(),

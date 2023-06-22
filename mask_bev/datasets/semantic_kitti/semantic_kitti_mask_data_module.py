@@ -98,7 +98,7 @@ class SemanticKittiMaskDataModule(pl.LightningDataModule):
                 pp.Second(pp.Compose([
                     MaskScanToMask(),
                     MaskToLabelInstanceMasks(self._num_queries),
-                    LabelMaskToMask2FormerLabel(self._num_classes),
+                    # LabelMaskToMask2FormerLabel(self._num_classes),
                 ])),
                 pp.Third(pp.Compose([
                     FrameMetaData(),

@@ -71,8 +71,8 @@ class MaskBevPanopticHead(nn.Module):
             evaluated_class = 0
             pred_softmax = batch_pred_cls.softmax(dim=-1)
             y_scores = pred_softmax[:, evaluated_class]
-            y_pred = self._num_classes - batch_pred_cls.argmax(dim=-1)
-            y_true = self._num_classes - labels
+            y_pred = batch_pred_cls.argmax(dim=-1)
+            y_true = labels
 
             # Classification metric
             cls_metric.update(y_scores, y_true)

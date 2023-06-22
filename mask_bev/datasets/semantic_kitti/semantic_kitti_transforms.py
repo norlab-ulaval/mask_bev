@@ -22,6 +22,7 @@ class FilterSmallMasks:
                 continue
             if np.sum(s.mask == inst) < self._min_num_inst_pixels:
                 s.mask[s.mask == inst] = 0
+        return s
 
 
 class ScanToPointCloud:
