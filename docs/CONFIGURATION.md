@@ -68,7 +68,11 @@ background class.
 ## Dataset
 `batch_size`: Batch size.
 
+`test_batch_size`: Batch size for testing.
+
 `num_workers`: Number of workers for the data loader.
+
+`test_num_workers`: Number of workers for the data loader for testing.
 
 `pin_memory`: Whether to pin memory for the data loader.
 

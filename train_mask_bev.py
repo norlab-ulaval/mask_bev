@@ -1,9 +1,11 @@
 import argparse
 import os
+import re
 import subprocess
 import sys
 
 import yaml
+from pytorch_lightning.cli import ReduceLROnPlateau
 
 from mask_bev.augmentations.kitti_mask_augmentations import make_kitti_augmentation_list
 from mask_bev.augmentations.semantic_kitti_mask_augmentations import make_semantic_kitti_augmentation_list
@@ -26,7 +28,15 @@ from mask_bev.datasets.semantic_kitti.semantic_kitti_mask_data_module import Sem
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', '-c', type=str, help='Config file for current run', required=True)
+    parser.add_argument('--train', '-t', action='store_true', help='Train the model')
+    parser.add_argument('--test', '-e', action='store_true', help='Test the model')
     args = parser.parse_args()
+
+    is_training = args.train
+    is_testing = args.test
+
+    if is_training is False and is_testing is False:
+        is_training = True
 
     config_path = pathlib.Path(args.config)
     exp_name = config_path.stem
@@ -36,7 +46,16 @@ if __name__ == '__main__':
     with open(config_path, 'r') as f:
         config: dict = yaml.safe_load(f)
 
-    model = MaskBevModule.from_config(config, exp_name, checkpoint_folder_path)
+    if is_testing:
+        val_loss_regex = re.compile(r'val_loss=([0-9]+\.?[0-9]*)')
+        checkpoints = [f for f in checkpoint_folder_path.iterdir() if f.suffix != 'last.ckpt' and not f.name.startswith('last')]
+        best_checkpoint = min(checkpoints, key=lambda x: float(val_loss_regex.search(str(x)).group(1)))
+        print(f'Testing from {best_checkpoint}')
+        config['checkpoint'] = str(best_checkpoint)
+        config['batch_size'] = config.get('test_batch_size', config.get('batch_size', 1))
+        config['num_workers'] = config.get('test_num_workers', config.get('num_workers', 0))
+
+    model = MaskBevModule.from_config(config, checkpoint_folder_path)
 
     # data
     dataset_name = config.get('dataset', 'semantic-kitti')
@@ -84,21 +103,13 @@ if __name__ == '__main__':
                              )
                          ])
     # train
-    trainer.fit(model, datamodule)
-    trainer.validate(model, datamodule)
+    if is_training:
+        trainer.fit(model, datamodule)
+
+    if is_testing:
+        trainer.validate(model, datamodule)
+        trainer.test(model, datamodule)
 
     # continue training
-    # val_loss_regex = re.compile(r'val_loss=([0-9]+\.?[0-9]*)')
-    # checkpoint_path = pathlib.Path('checkpoints')
-    # checkpoints = [f for f in checkpoint_path.iterdir() if f.name != 'last.ckpt']
-    # best_checkpoint = min(checkpoints, key=lambda x: float(val_loss_regex.search(str(x)).group(1)))
-    # print(f'Resuming from {best_checkpoint}')
     # trainer = pl.Trainer(resume_from_checkpoint=best_checkpoint, gpus=[0])
     # trainer.fit(model, datamodule)
-
-    # testing
-    # trainer.test(model, datamodule)
-    # test_set = TestSetDataLoader('data/test',
-    #                              transform=pp.Compose([TextureListToTensorList(), lambda x: torch.cat(x, dim=0)]))
-    # test_loader = DataLoader(test_set)
-    # trainer.test(model, test_loader)

@@ -96,12 +96,10 @@ class MaskBevModule(pl.LightningModule):
         self.save_hyperparameters()
 
     @staticmethod
-    def from_config(config: Dict, exp_name: str,
-                    checkpoint_folder_path: Optional[pathlib.Path] = None) -> 'MaskBevModule':
+    def from_config(config: Dict, checkpoint_folder_path: Optional[pathlib.Path] = None) -> 'MaskBevModule':
         """
         Load a model from a config dictionary
         :param config: dictionary of all parameters
-        :param exp_name: experience name, used for checkpointing and logging
         :param checkpoint_folder_path: path to the root checkpoint folder, used only if 'checkpoint' is 'last'
         :return: MaskBevModule
         """
@@ -327,8 +325,8 @@ class MaskBevModule(pl.LightningModule):
         loss = self.loss(loss_dict)
 
         # Compute metrics
-        # for layer_index, (cls_metric, map_metric, miou_metric) in self._val_metric_per_layer.items():
-        #     self._panoptic_head.update_mAP_metrics(layer_index, cls, masks, labels_gt, masks_gt, cls_metric, map_metric, miou_metric)
+        for layer_index, (cls_metric, map_metric, miou_metric) in self._val_metric_per_layer.items():
+            self._panoptic_head.update_mAP_metrics(layer_index, cls, masks, labels_gt, masks_gt, cls_metric, map_metric, miou_metric)
 
         self.log('val_loss', loss, batch_size=batch_size, prog_bar=True)
         self.log('hp_val_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size)
