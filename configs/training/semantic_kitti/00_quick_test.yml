@@ -37,7 +37,7 @@ head_reverse_class_weights: True
 # Dataset
 min_num_inst_pixels: 200
 batch_size: 1
-num_workers: 0
+num_workers: 1
 pin_memory: True
 remove_unseen: True
 shuffle_train: False
