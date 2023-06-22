@@ -2,17 +2,8 @@
 seed: 420
 
 # Model
-# from maskformer (CNN)
-#checkpoint: /home/william/exx_backup/checkpoints/01_point_mask/01_point_mask-epoch=10-val_loss=5.438405.ckpt
 lr: 1.0e-4
-weight_decay: 1.0e-4
-# lr = 1.0e-4 / 4
-# from maskformer (swin)
-# lr = 6.0e-5
-# weight_decay = 1.0e-2
-# from mask2former
-# lr = 1.0e-4
-# weight_decay = 5.0e-2
+weight_decay: 0
 optimiser_type: adam_w
 lr_schedulers_type: plateau
 differential_lr: False
@@ -51,7 +42,7 @@ remove_unseen: True
 shuffle_train: False
 min_num_points: 1
 limit_train_batches: 1
-limit_val_batches: 10000
+limit_val_batches: 0
 #log_every_n_steps: 1
 #augmentations:
 #  - name: 'drop'
