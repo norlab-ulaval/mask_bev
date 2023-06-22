@@ -84,10 +84,11 @@ class SemanticKittiMaskDataset(Dataset):
         if self._approx_scene:
             valid_scans_numbers = self._approx_valid_scans(scan, scan_positions_in_seq)
         else:
-            in_range = (self._x_range[0] < scan_positions_in_seq[:, 0]) & \
-                       (scan_positions_in_seq[:, 0] < self._x_range[1]) & \
-                       (self._y_range[0] < scan_positions_in_seq[:, 1]) & \
-                       (scan_positions_in_seq[:, 1] < self._y_range[1])
+            scaling = 2
+            in_range = (scaling * self._x_range[0] < scan_positions_in_seq[:, 0]) & \
+                       (scan_positions_in_seq[:, 0] < self._x_range[1] * scaling) & \
+                       (scaling * self._y_range[0] < scan_positions_in_seq[:, 1]) & \
+                       (scan_positions_in_seq[:, 1] < self._y_range[1] * scaling)
             valid_scans_numbers = np.argwhere(in_range).squeeze()
         max_points = sum(
             s.num_points for s in self._sequence_dataset.load_scan_numbers_in_sequence(sequence, valid_scans_numbers))

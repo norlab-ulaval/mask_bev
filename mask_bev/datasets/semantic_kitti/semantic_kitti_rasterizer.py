@@ -11,8 +11,7 @@ from mask_bev.datasets.semantic_kitti.semantic_kitti_scene import SceneMaker, Se
 
 class SemanticKittiRasterizer:
     def __init__(self, x_range: (int, int), y_range: (int, int), z_range: (int, int), voxel_size: float,
-                 remove_unseen: bool = False, min_points: int = 1, morph_kernel_size: int = 9,
-                 min_inst_pixel: int = 400):
+                 remove_unseen: bool = False, min_points: int = 1, morph_kernel_size: int = 9):
         """
         Converts a point cloud to an image where each instance has a different value
         :param x_range: x range of the image
@@ -22,7 +21,6 @@ class SemanticKittiRasterizer:
         :param remove_unseen: remove instances not visible from the center scan in the mask
         :param min_points: minimum number of points to be considered seen
         :param morph_kernel_size: size of the kernel used for morphological operations
-        :param min_inst_pixel: minimum number of pixels for an instance to be considered
         """
         self._x_range = x_range
         self._y_range = y_range
@@ -34,14 +32,13 @@ class SemanticKittiRasterizer:
         self._remove_unseen = remove_unseen
         self._min_points = min_points
         self._morph_kernel_size = morph_kernel_size
-        self._min_inst_pixel = min_inst_pixel
 
         self._lattice_idx = np.mgrid[0:self._num_voxel_x, 0:self._num_voxel_y]
         self._lattice_lower_left_corner = (self._lattice_idx.T * voxel_size + [self._x_range[0], self._y_range[0]]).T
         self._lattice_center = (self._lattice_lower_left_corner + voxel_size / 2)
         self._idx = None
 
-    def get_mask_around(self, scan: SemanticKittiScan, scene: SemanticKittiScene, filter_bad_instances: bool = True):
+    def get_mask_around(self, scan: SemanticKittiScan, scene: SemanticKittiScene):
         """
         Generates a mask where each pixel corresponds to what instance is present in the corresponding voxel
         :param scan: center scan around which to generate the mask
@@ -92,18 +89,9 @@ class SemanticKittiRasterizer:
 
             instance_mask = instance_voxel > 0.5
 
-            if filter_bad_instances:
-                instance_mask = self._filter_bad_instances(instance_mask)
-
             out_voxels[instance_mask] = instance
         self._idx = idx
         return out_voxels
-
-    def _filter_bad_instances(self, instance_mask):
-        num_pixels = np.sum(instance_mask)
-        if num_pixels < self._min_inst_pixel:
-            return np.zeros_like(instance_mask, dtype=bool)
-        return instance_mask
 
 
 if __name__ == '__main__':

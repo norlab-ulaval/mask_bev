@@ -43,6 +43,7 @@ head_out_channels: 256
 head_reverse_class_weights: True
 
 # Dataset
+min_num_inst_pixels: 300
 batch_size: 1
 num_workers: 0
 pin_memory: True
