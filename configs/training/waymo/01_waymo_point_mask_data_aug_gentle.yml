@@ -13,9 +13,10 @@ x_range: [ -40, 40 ]
 y_range: [ -40, 40 ]
 z_range: [ -20, 20 ]
 voxel_size: 0.16
-num_queries: 45
+num_queries: 170
 
 # Encoder
+pc_point_dim: 3
 max_num_points: 32
 encoder_feat_channels: [ 128, 128, 128 ]
 
@@ -24,7 +25,11 @@ backbone_embed_dim: 192
 head_feat_channels: 256
 head_out_channels: 256
 
+# Head
+head_num_classes: 2
+
 # Dataset
+dataset: waymo
 batch_size: 4
 num_workers: 4
 pin_memory: True

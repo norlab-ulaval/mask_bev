@@ -1,17 +1,18 @@
 import time
 from typing import Callable
 
-import mask_bev.utils.pipeline as pp
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 
+import mask_bev.utils.pipeline as pp
 from mask_bev.datasets.apply_transform import ApplyTransform
 from mask_bev.datasets.collate_type import CollateType
 from mask_bev.datasets.semantic_kitti.semantic_kitti_dataset import SemanticKittiSequenceDataset, \
     SemanticKittiRawLabel
 from mask_bev.datasets.semantic_kitti.semantic_kitti_mask_dataset import SemanticKittiMaskDataset
 from mask_bev.datasets.semantic_kitti.semantic_kitti_transforms import MaskScanToPointCloud, MaskScanToMask, \
-    MaskListCollateHeight, MaskTensorCollate, ShufflePointCloud, MaskToLabelInstanceMasks, FrameMetaData
+    MaskListCollateHeight, MaskTensorCollate, ShufflePointCloud, MaskToLabelInstanceMasks, FrameMetaData, \
+    LabelMaskToMask2FormerLabel, FilterSmallMasks
 
 
 # TODO Unify with other data modules
@@ -20,7 +21,7 @@ class SemanticKittiMaskDataModule(pl.LightningDataModule):
                  y_range: (int, int), z_range: (int, int), voxel_size: float, remove_unseen: bool,
                  num_workers: int = 8, pin_memory: bool = True, collate_fn: CollateType = CollateType.ListCollate,
                  shuffle_train: bool = True, dataset_transform: Callable = None, predict_heights: bool = False,
-                 **kwargs):
+                 head_num_classes: int = 1, min_num_inst_pixels=300, **kwargs):
         """
         Pytorch lightning wrapper around SemanticKittiMaskDataset
         :param root_path: root path of the dataset
@@ -30,6 +31,10 @@ class SemanticKittiMaskDataModule(pl.LightningDataModule):
         :param pin_memory: allow the GPU to directly access memory
         :param collate_fn: collate function that collects samples into batchs
         :param dataset_transform: transform to apply to `SemanticKittiMaskDataset`
+        :param predict_heights: predict the height of the objects
+        :param head_num_classes: number of classes to predict
+        :param min_num_inst_pixels: minimum number of pixels to consider an instance
+        :param kwargs: additional arguments
         """
         super().__init__()
         self._batch_size = batch_size
@@ -45,6 +50,8 @@ class SemanticKittiMaskDataModule(pl.LightningDataModule):
         self._shuffle_train = shuffle_train
         self._dataset_transform = dataset_transform
         self._predict_heights = predict_heights
+        self._num_classes = head_num_classes
+        self._min_num_inst_pixels = min_num_inst_pixels
 
         included_labels = [SemanticKittiRawLabel.CAR]
 
@@ -82,6 +89,7 @@ class SemanticKittiMaskDataModule(pl.LightningDataModule):
         # if self._predict_heights:
         if True:
             return pp.Compose([
+                FilterSmallMasks(self._min_num_inst_pixels),
                 pp.Tupled(3),
                 pp.First(pp.Compose([
                     MaskScanToPointCloud(),
@@ -90,6 +98,7 @@ class SemanticKittiMaskDataModule(pl.LightningDataModule):
                 pp.Second(pp.Compose([
                     MaskScanToMask(),
                     MaskToLabelInstanceMasks(self._num_queries),
+                    # LabelMaskToMask2FormerLabel(self._num_classes),
                 ])),
                 pp.Third(pp.Compose([
                     FrameMetaData(),
@@ -106,6 +115,7 @@ class SemanticKittiMaskDataModule(pl.LightningDataModule):
                 pp.Second(pp.Compose([
                     MaskScanToMask(),
                     MaskToLabelInstanceMasks(self._num_queries),
+                    LabelMaskToMask2FormerLabel(self._num_classes),
                 ])),
             ])
 

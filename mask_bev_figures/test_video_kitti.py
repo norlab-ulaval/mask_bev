@@ -12,6 +12,7 @@ import yaml
 from PIL import Image
 from matplotlib import pyplot as plt
 
+from mask_bev.datasets.kitti.kitti_data_module import KittiDataModule
 from mask_bev.datasets.semantic_kitti.semantic_kitti_dataset import SemanticKittiDataset, SemanticKittiSequenceDataset
 from mask_bev.datasets.semantic_kitti.semantic_kitti_mask_data_module import SemanticKittiMaskDataModule
 from mask_bev.datasets.semantic_kitti.semantic_kitti_rasterizer import SemanticKittiRasterizer
@@ -20,6 +21,7 @@ from mask_bev.mask_bev_module import MaskBevModule
 from mask_bev.visualization.point_cloud_viz import show_point_cloud
 
 
+# TODO clean up
 class TestVideoKITTI(unittest.TestCase):
     def setUp(self):
         self.idx = 2513
@@ -225,3 +227,52 @@ class TestVideoKITTI(unittest.TestCase):
             instance_gt_img = cv2.cvtColor(instance_gt_img, cv2.COLOR_GRAY2RGB)
             instance_gt_img = Image.fromarray(instance_gt_img)
             instance_gt_img.save(gt_path.joinpath(f'{scan_num:04}.png'))
+
+    def test_kitti_fig_5_h(self):
+        plt.rcParams['figure.dpi'] = 450
+        sample_idx = 0
+        pl.seed_everything(45)
+
+        config_path = pathlib.Path('configs/old_training/kitti/02_kitti_point_mask_lower_lr_no_abs.yml')
+        # Load model
+        exp_name = config_path.stem
+        checkpoint_folder_path = pathlib.Path('checkpoints').joinpath(exp_name)
+        with open(config_path, 'r') as f:
+            config: dict = yaml.safe_load(f)
+        config['shuffle_train'] = True
+        config['batch_size'] = 1
+        config['num_workers'] = 0
+
+        datamodule = KittiDataModule('data/KITTI', **config)
+        gen_figs = True
+
+        if gen_figs:
+            dataloader = datamodule.val_dataloader()
+            iterator = iter(dataloader)
+            for i in range(20):
+                point_clouds, (labels_gt, masks_gt), metadata = next(iterator)
+            for j in range(5):
+                # for i in range(20):
+                point_clouds, (labels_gt, masks_gt), metadata = next(iterator)
+
+                instances_gt = torch.zeros((500, 500, 3))
+                for i, m in enumerate(masks_gt[0]):
+                    r = np.random.uniform(0, 1)
+                    g = np.random.uniform(0, 1)
+                    b = np.random.uniform(0, 1)
+                    instances_gt[m > 0, :] = 1
+
+                # Get mask and encoded point cloud
+                point_clouds[0]
+
+                gt_img = Image.fromarray(np.uint8(instances_gt[:, :] * 255))
+                w, h = gt_img.size
+                # gt_img = gt_img.resize((w * 2, h * 2)).crop((w / 2, h / 2, 3 * w / 2, 3 * h / 2))
+                gt_img.save(
+                    '/home/william/Documents/Writing/publication_IROS2023_WilliamGuimont-Martin/figs/kitti_gt.png')
+
+                # Plot
+                plt.imshow(instances_gt[:, :])
+                plt.show()
+                if j == 2:
+                    break

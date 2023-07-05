@@ -4,6 +4,7 @@ import unittest
 import matplotlib.pyplot as plt
 import pytorch_lightning as pl
 import torch
+import tqdm
 
 from mask_bev.datasets.semantic_kitti.semantic_kitti_mask_data_module import SemanticKittiMaskDataModule, CollateType
 
@@ -84,3 +85,11 @@ class TestSemanticKittiDataModule(unittest.TestCase):
         for pc, (labels, masks) in dataloader:
             self.assertEqual((self.batch_size, datamodule.num_queries), labels.shape)
             self.assertEqual((self.batch_size, datamodule.num_queries, 160, 160), masks.shape)
+
+    def test_validation_sometimes_crash(self):
+        datamodule = SemanticKittiMaskDataModule('data/SemanticKITTI', self.batch_size, 1, 40, self.x_range,
+                                                 self.y_range, self.z_range, self.voxel_size, True, 0, False,
+                                                 collate_fn=CollateType.TensorCollate, shuffle_train=False)
+        dataloader = datamodule.val_dataloader()
+        for pc, (labels, masks) in tqdm.tqdm(dataloader):
+            ...

@@ -66,9 +66,15 @@ background class.
 `head_num_classes`: Number of classes of the head output.
 
 ## Dataset
+`min_num_inst_pixels`: Minimum number of pixels to keep an instance in the dataset.
+
 `batch_size`: Batch size.
 
+`test_batch_size`: Batch size for testing.
+
 `num_workers`: Number of workers for the data loader.
+
+`test_num_workers`: Number of workers for the data loader for testing.
 
 `pin_memory`: Whether to pin memory for the data loader.
 

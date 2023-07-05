@@ -20,6 +20,7 @@ class SemanticKittiRasterizer:
         :param voxel_size: size of each pixel in the mask
         :param remove_unseen: remove instances not visible from the center scan in the mask
         :param min_points: minimum number of points to be considered seen
+        :param morph_kernel_size: size of the kernel used for morphological operations
         """
         self._x_range = x_range
         self._y_range = y_range
@@ -42,6 +43,7 @@ class SemanticKittiRasterizer:
         Generates a mask where each pixel corresponds to what instance is present in the corresponding voxel
         :param scan: center scan around which to generate the mask
         :param scene: scene containing all points of all the scans in a sequence
+        :param filter_bad_instances: whether to filter out instances with less than min_inst_pixel pixels
         :return: mask of the shape (num_voxel_x, num_voxel_y)
         """
         scene_pc = scene.point_cloud

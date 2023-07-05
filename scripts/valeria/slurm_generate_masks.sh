@@ -3,6 +3,7 @@
 #SBATCH --cpus-per-task=32
 #SBATCH --mem=12G
 #SBATCH --time=0-04:00
+#SBATCH --array=1-10%1
 #SBATCH --partition=gpu
 #SBATCH --job-name=generate_masks
 #SBATCH --output=%x-%j.out

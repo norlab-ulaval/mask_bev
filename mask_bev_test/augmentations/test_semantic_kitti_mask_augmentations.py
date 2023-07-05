@@ -1,10 +1,10 @@
 import unittest
 
-import mask_bev.utils.pipeline as pp
 import pytorch_lightning as pl
 import torch
 from matplotlib import pyplot as plt
 
+import mask_bev.utils.pipeline as pp
 from mask_bev.augmentations.semantic_kitti_mask_augmentations import Flip, ShufflePoints, RandomRotate, \
     DecimatePoints, JitterPoints, \
     RandomDropPoints
@@ -15,7 +15,7 @@ from mask_bev.visualization.point_cloud_viz import show_point_cloud
 class TestMaskAugmentations(unittest.TestCase):
     def setUp(self):
         pl.seed_everything(420)
-        self.batch_size = 2
+        self.batch_size = 1
         self.x_range, self.y_range, self.z_range, self.voxel_size = (-40, 40), (-40, 40), (-10, 10), 0.16
 
     @unittest.skip('plot')
@@ -53,11 +53,12 @@ class TestMaskAugmentations(unittest.TestCase):
         jitter = RandomDropPoints(1, 0.8)
         self._run_with_augmentation(jitter)
 
-    def _show(self, masks, point_clouds):
+    def _show(self, masks, point_clouds, show_3d=False):
         plt.imshow(torch.flip(masks[0].sum(dim=0), dims=(0,)))
         plt.show()
-        pc = point_clouds[0][0]
-        show_point_cloud('render', pc[::])
+        if show_3d:
+            pc = point_clouds[0][0]
+            show_point_cloud('render', pc[::])
 
     def _get_dataloader(self, transform):
         datamodule = SemanticKittiMaskDataModule('data/SemanticKITTI', self.batch_size, 1, 45, self.x_range,
@@ -67,11 +68,18 @@ class TestMaskAugmentations(unittest.TestCase):
         dataloader = datamodule.train_dataloader()
         return dataloader
 
-    def _run_with_augmentation(self, aug):
+    def _get_nth(self, dataloader, n):
+        iterator = iter(dataloader)
+        for _ in range(n + 1):
+            batch = next(iterator)
+        return batch
+
+    def _run_with_augmentation(self, aug, show_3d=False):
         id_dataloader = self._get_dataloader(pp.Identity())
         dataloader = self._get_dataloader(aug)
 
-        id_point_clouds, (id_labels, id_masks) = next(iter(id_dataloader))
-        point_clouds, (labels, masks) = next(iter(dataloader))
-        self._show(id_masks, id_point_clouds)
-        self._show(masks, point_clouds)
+        sample_idx = 0
+        id_point_clouds, (id_labels, id_masks) = self._get_nth(id_dataloader, sample_idx)
+        point_clouds, (labels, masks) = self._get_nth(dataloader, sample_idx)
+        self._show(id_masks, id_point_clouds, show_3d)
+        self._show(masks, point_clouds, show_3d)

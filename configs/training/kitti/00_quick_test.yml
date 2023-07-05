@@ -2,7 +2,6 @@
 seed: 420
 
 # Model
-#checkpoint: last
 lr: 1.0e-4
 weight_decay: 0
 optimiser_type: adam_w
@@ -35,15 +34,15 @@ head_out_channels: 256
 head_reverse_class_weights: True
 
 # Dataset
-min_num_inst_pixels: 200
+dataset: kitti
 batch_size: 1
-num_workers: 1
+num_workers: 0
 pin_memory: True
 remove_unseen: True
 shuffle_train: False
 min_num_points: 1
 limit_train_batches: 1
-limit_val_batches: 0
+limit_val_batches: 1
 #log_every_n_steps: 1
 #augmentations:
 #  - name: 'drop'

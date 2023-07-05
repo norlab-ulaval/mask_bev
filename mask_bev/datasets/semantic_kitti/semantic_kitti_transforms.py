@@ -8,6 +8,23 @@ from mask_bev.datasets.semantic_kitti.semantic_kitti_dataset import SemanticKitt
 from mask_bev.datasets.semantic_kitti.semantic_kitti_mask_dataset import SemanticKittiMaskScan
 
 
+class FilterSmallMasks:
+    def __init__(self, min_num_inst_pixels: int):
+        """
+        Filter small masks under a certain number of pixels
+        :param min_num_inst_pixels:
+        """
+        self._min_num_inst_pixels = min_num_inst_pixels
+
+    def __call__(self, s: SemanticKittiMaskScan):
+        for inst in np.unique(s.mask):
+            if inst == 0:
+                continue
+            if np.sum(s.mask == inst) < self._min_num_inst_pixels:
+                s.mask[s.mask == inst] = 0
+        return s
+
+
 class ScanToPointCloud:
     def __call__(self, s: SemanticKittiScan):
         return s.point_cloud
@@ -62,6 +79,16 @@ class MaskToLabelInstanceMasks:
         for i, inst in enumerate(instances):
             labels[i] = SemanticKittiLearningLabel.CAR
             masks[i, mask == inst] = 1.0
+        return labels, masks
+
+
+class LabelMaskToMask2FormerLabel:
+    def __init__(self, num_classes: int):
+        self._num_classes = num_classes
+
+    def __call__(self, x: tuple[torch.Tensor, torch.Tensor]):
+        labels, masks = x
+        labels = self._num_classes - labels
         return labels, masks
 
 

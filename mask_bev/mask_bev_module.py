@@ -5,14 +5,15 @@ from typing import Union, Dict, Any, Optional
 import pytorch_lightning as pl
 import torch
 import torch_optimizer
-from mask_bev.models.backbones.mask_bev_backbone import MaskBevBackbone
-from mask_bev.models.encoders.mask_bev_encoders import MaskBevEncoder, EncodingType
-from mask_bev.models.head.mask_bev_panoptic_head import MaskBevPanopticHead
 from torch.optim import SGD, AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
 from torch.utils.tensorboard import SummaryWriter
+from torchmetrics.detection import MeanAveragePrecision
 
-from mask_bev.evaluation.detection_metric import DetectionMapMetric, BinaryClassifMapMetric, MeanIoU, MaskArea
+from mask_bev.evaluation.detection_metric import BinaryClassifMapMetric, MeanIoU, MaskArea
+from mask_bev.models.backbones.mask_bev_backbone import MaskBevBackbone
+from mask_bev.models.encoders.mask_bev_encoders import MaskBevEncoder, EncodingType
+from mask_bev.models.head.mask_bev_panoptic_head import MaskBevPanopticHead
 from mask_bev.models.training_types import OptimizerType, LrSchedulerType
 
 # TODO test global vs local (build a scene without global info)
@@ -39,7 +40,7 @@ class MaskBevModule(pl.LightningModule):
                  encoder_fourier_enc_group: int = 1, backbone_patch_size: int = 4, backbone_window_size: int = 10,
                  backbone_strides: (int, int, int, int) = (4, 2, 2, 2), backbone_use_abs_emb: bool = True,
                  backbone_swap_dims: bool = False, head_reverse_class_weights: bool = False, head_num_classes: int = 1,
-                 pc_point_dim: int = 4, predict_heights: bool = False, **kwargs):
+                 pc_point_dim: int = 4, predict_heights: bool = False, batch_size: int = 1, **kwargs):
         """
         MaskBev base network
 
@@ -78,37 +79,27 @@ class MaskBevModule(pl.LightningModule):
         self._panoptic_head = MaskBevPanopticHead(head_in_dims, head_feat_channels, head_out_channels, num_queries,
                                                   head_num_classes, head_reverse_class_weights, predict_heights)
 
-        self._train_mIoU = MeanIoU()
-        self._train_cls_map = BinaryClassifMapMetric()
-        self._train_height_map = DetectionMapMetric() if self._predict_heights else None
-        # self._train_cls_map = DetectionMapMetric()
-        self._train_mask_map_all = [DetectionMapMetric() for _ in range(10)]
-        self._train_mask_map = DetectionMapMetric()
-        self._train_easy_map = DetectionMapMetric()
-        self._train_moderate_map = DetectionMapMetric()
-        self._train_hard_map = DetectionMapMetric()
+        self.num_layers = 10
+        self._max_detection_per_step = num_queries * batch_size
 
-        self._val_mIoU = MeanIoU()
-        self._val_mIoU_points = MeanIoU()
-        self._val_cls_map = BinaryClassifMapMetric()
-        self._val_height_map = DetectionMapMetric() if self._predict_heights else None
-        # self._val_cls_map = DetectionMapMetric()
-        self._val_mask_map_all = [DetectionMapMetric().to('cuda') for _ in range(10)]
+        self._train_metric_per_layer = {layer_index: (
+            BinaryClassifMapMetric(), MeanAveragePrecision(iou_type='segm', max_det=self._max_detection_per_step, class_metrics=False), MeanIoU()) for
+            layer_index in range(self.num_layers)}
+        self._val_metric_per_layer = {layer_index: (
+            BinaryClassifMapMetric(), MeanAveragePrecision(iou_type='segm', max_det=self._max_detection_per_step, class_metrics=False), MeanIoU()) for
+            layer_index in range(self.num_layers)}
+
+        # TODO add mask area to panoptic head
+        self._train_mask_area = MaskArea()
         self._val_mask_area = MaskArea()
-        self._val_mask_map = DetectionMapMetric()
-        self._val_easy_map = DetectionMapMetric()
-        self._val_moderate_map = DetectionMapMetric()
-        self._val_hard_map = DetectionMapMetric()
 
         self.save_hyperparameters()
 
     @staticmethod
-    def from_config(config: Dict, exp_name: str,
-                    checkpoint_folder_path: Optional[pathlib.Path] = None) -> 'MaskBevModule':
+    def from_config(config: Dict, checkpoint_folder_path: Optional[pathlib.Path] = None) -> 'MaskBevModule':
         """
         Load a model from a config dictionary
         :param config: dictionary of all parameters
-        :param exp_name: experience name, used for checkpointing and logging
         :param checkpoint_folder_path: path to the root checkpoint folder, used only if 'checkpoint' is 'last'
         :return: MaskBevModule
         """
@@ -225,6 +216,23 @@ class MaskBevModule(pl.LightningModule):
         img = torch.sigmoid(img)
         return img
 
+    def log_metrics(self, split, metric_dict):
+        for layer_index, (cls_metric, map_metric, miou_metric) in metric_dict.items():
+            prog_bar = layer_index == self.num_layers - 1
+            self.log(f'{split}_mAP_cls_{layer_index}', cls_metric.compute(), prog_bar=prog_bar)
+            mAPs = map_metric.compute()
+            for name, value in mAPs.items():
+                if 'small' in name or 'medium' in name or 'large' in name or 'mar' in name:
+                    mAP_prog_bar = False
+                else:
+                    mAP_prog_bar = prog_bar
+                self.log(f'{split}_mAP_{layer_index}_{name}', value, prog_bar=mAP_prog_bar)
+            self.log(f'{split}_mIoU_{layer_index}', miou_metric.compute(), prog_bar=prog_bar)
+
+            cls_metric.reset()
+            map_metric.reset()
+            miou_metric.reset()
+
     def training_step(self, train_batch, batch_idx):
         logging_step = batch_idx == 0
         step = self.current_epoch
@@ -257,12 +265,9 @@ class MaskBevModule(pl.LightningModule):
         loss_dict = self.compute_loss(cls, masks, labels_gt, masks_gt, heights, heights_gt)
         loss = self.loss(loss_dict)
 
-        # TODO add back average precision
-        # self._panoptic_head.add_average_precision(self._train_cls_map, self._train_height_map, self._train_mask_map,
-        #                                           cls,
-        #                                           masks, labels_gt, masks_gt, heights, heights_gt, metadata,
-        #                                           [self._train_easy_map, self._train_moderate_map,
-        #                                            self._train_hard_map], self._train_mIoU, self._train_mask_map_all)
+        # Compute metrics
+        # for layer_index, (cls_metric, map_metric, miou_metric) in self._train_metric_per_layer.items():
+        #     self._panoptic_head.update_mAP_metrics(layer_index, cls, masks, labels_gt, masks_gt, cls_metric, map_metric, miou_metric)
 
         self.log('train_loss', loss, batch_size=batch_size, prog_bar=True)
         self.log('hp_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size)
@@ -286,18 +291,7 @@ class MaskBevModule(pl.LightningModule):
         return loss
 
     def on_train_epoch_end(self):
-        # TODO add back logging
-        return
-        self.log('train_mIoU', self._train_mIoU.compute(), prog_bar=True)
-        self.log('train_mAP_mask', self._train_mask_map.compute(), prog_bar=True)
-        self.log('train_mAP_easy', self._train_easy_map.compute(), prog_bar=False)
-        self.log('train_mAP_moderate', self._train_moderate_map.compute(), prog_bar=False)
-        self.log('train_mAP_hard', self._train_hard_map.compute(), prog_bar=False)
-        self.log('train_mAP_cls', self._train_cls_map.compute(), prog_bar=True)
-        if self._train_height_map is not None:
-            self.log('train_mAP_height', self._train_height_map.compute(), prog_bar=True)
-        self._train_mask_map.reset()
-        self._train_cls_map.reset()
+        self.log_metrics('train', self._train_metric_per_layer)
 
     def validation_step(self, val_batch, batch_idx):
         logging_step = batch_idx == 0
@@ -330,13 +324,9 @@ class MaskBevModule(pl.LightningModule):
         loss_dict = self.compute_loss(cls, masks, labels_gt, masks_gt, heights, heights_gt)
         loss = self.loss(loss_dict)
 
-        # TODO add average precision
-        # self._panoptic_head.add_average_precision(self._val_cls_map, self._val_height_map, self._val_mask_map, cls,
-        #                                           masks,
-        #                                           labels_gt, masks_gt, heights, heights_gt, metadata,
-        #                                           [self._val_easy_map, self._val_moderate_map, self._val_hard_map],
-        #                                           self._val_mIoU, self._val_mask_map_all, self._val_mask_area,
-        #                                           self._val_mIoU_points)
+        # Compute metrics
+        for layer_index, (cls_metric, map_metric, miou_metric) in self._val_metric_per_layer.items():
+            self._panoptic_head.update_mAP_metrics(layer_index, cls, masks, labels_gt, masks_gt, cls_metric, map_metric, miou_metric)
 
         self.log('val_loss', loss, batch_size=batch_size, prog_bar=True)
         self.log('hp_val_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size)
@@ -357,20 +347,4 @@ class MaskBevModule(pl.LightningModule):
         return loss
 
     def on_validation_epoch_end(self):
-        # TODO add back logging
-        return
-        self.log('val_mIoU', self._val_mIoU.compute(), prog_bar=True)
-        self.log('val_mIoU_points', self._val_mIoU_points.compute(), prog_bar=True)
-
-        mAP = [m.compute() for m in self._val_mask_map_all]
-        self.log('val_mAP_all', sum(mAP) / 10.0, prog_bar=True)
-        self.log('val_mAP_mask', self._val_mask_map.compute(), prog_bar=True)
-        self.log('val_mAP_easy', self._val_easy_map.compute(), prog_bar=False)
-        self.log('val_mAP_moderate', self._val_moderate_map.compute(), prog_bar=False)
-        self.log('val_mAP_hard', self._val_hard_map.compute(), prog_bar=False)
-        self.log('val_mAP_cls', self._val_cls_map.compute(), prog_bar=True)
-        self._val_mask_area.compute()
-        if self._val_height_map is not None:
-            self.log('val_mAP_height', self._val_height_map.compute(), prog_bar=True)
-        self._val_mask_map.reset()
-        self._val_cls_map.reset()
+        self.log_metrics('val', self._val_metric_per_layer)

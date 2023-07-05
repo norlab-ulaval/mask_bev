@@ -84,10 +84,11 @@ class SemanticKittiMaskDataset(Dataset):
         if self._approx_scene:
             valid_scans_numbers = self._approx_valid_scans(scan, scan_positions_in_seq)
         else:
-            in_range = (self._x_range[0] < scan_positions_in_seq[:, 0]) & \
-                       (scan_positions_in_seq[:, 0] < self._x_range[1]) & \
-                       (self._y_range[0] < scan_positions_in_seq[:, 1]) & \
-                       (scan_positions_in_seq[:, 1] < self._y_range[1])
+            scaling = 2
+            in_range = (scaling * self._x_range[0] < scan_positions_in_seq[:, 0]) & \
+                       (scan_positions_in_seq[:, 0] < self._x_range[1] * scaling) & \
+                       (scaling * self._y_range[0] < scan_positions_in_seq[:, 1]) & \
+                       (scan_positions_in_seq[:, 1] < self._y_range[1] * scaling)
             valid_scans_numbers = np.argwhere(in_range).squeeze()
         max_points = sum(
             s.num_points for s in self._sequence_dataset.load_scan_numbers_in_sequence(sequence, valid_scans_numbers))
@@ -129,19 +130,21 @@ class SemanticKittiMaskDataset(Dataset):
     def _get_cached(self, scan):
         mask_path = self._cache_of_scan(scan)
         if mask_path.exists():
-            mask = np.loadtxt(str(mask_path))
+            with open(str(mask_path), 'rb') as f:
+                mask = np.load(f)
             return mask
         return None
 
     def _cache_mask(self, mask, scan):
         mask_path = self._cache_of_scan(scan)
         mask_path.parent.mkdir(parents=True, exist_ok=True)
-        np.savetxt(str(mask_path), mask)
+        with open(str(mask_path), 'wb') as f:
+            np.save(f, mask)
 
     def _cache_of_scan(self, scan) -> pathlib.Path:
         seq_number = scan.seq_number
         scan_number = scan.scan_number
-        return self._cache_path.joinpath(str(seq_number)).joinpath(f'{scan_number}.txt')
+        return self._cache_path.joinpath(str(seq_number)).joinpath(f'{scan_number}.npy')
 
 
 if __name__ == '__main__':

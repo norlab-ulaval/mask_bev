@@ -3,17 +3,20 @@ seed: 420
 checkpoint:
 
 # Model
-lr: 1.0e-4
-weight_decay: 1.0e-4
+lr: 5.0e-5  # Here
+weight_decay: 1.0e-4  # Here
 optimiser_type: adam_w
 lr_schedulers_type: plateau
-differential_lr: False
+differential_lr: False  # Here
 differential_lr_scaling: 0.1
-x_range: [ -40, 40 ]
+x_range: [ 0, 80 ]
 y_range: [ -40, 40 ]
 z_range: [ -20, 20 ]
 voxel_size: 0.16
-num_queries: 45
+num_queries: 45  # Here
+
+# Head
+head_reverse_class_weights: False  # Here
 
 # Encoder
 max_num_points: 32
@@ -23,8 +26,10 @@ encoder_feat_channels: [ 128, 128, 128 ]
 backbone_embed_dim: 192
 head_feat_channels: 256
 head_out_channels: 256
+backbone_use_abs_emb: False
 
 # Dataset
+dataset: kitti
 batch_size: 4
 num_workers: 4
 pin_memory: True
@@ -32,18 +37,26 @@ remove_unseen: True
 shuffle_train: True
 min_num_points: 1
 augmentations:
-  - name: 'drop'
-    prob_drop: 0.5
-    per_point_drop_prob: 0.05
+  - name: 'object_sample'
+    dataset_root: 'data/KITTI'
+    num_sample: 10
+  - name: 'object_noise'
   - name: 'flip'
     prob_flip_x: 0
     prob_flip_y: 0.5
-  - name: 'shuffle'
-    prob_shuffle: 0
   - name: 'rotate'
-    rotate_prob: 0.5
-    rotation_range: 5
+    rotate_prob: 0.1
+    rotation_range: 2.5
+  - name: 'global_noise'
+    prob_aug: 0.5
+  - name: 'drop'
+    prob_drop: 0.1
+    per_point_drop_prob: 0.05
+  - name: 'shuffle'
+    prob_shuffle: 0.5
   - name: 'jitter'
-    prob_jitter: 0.5
-    jitter_std: 0.02
+    prob_jitter: 0.25
+    jitter_std: 0.01
+    max_delta: 0.025
     intensity_std: 0.01
+

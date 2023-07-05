@@ -16,6 +16,12 @@ cd data
 ln -s path/to/dataset/SemanticKITTI SemanticKITTI
 ```
 
+### Generate mask cachet
+
+```shell
+scripts/generate_semantic_kitti_mask_cache.py
+```
+
 ## KITTI-360
 
 Download the following files and extract them
