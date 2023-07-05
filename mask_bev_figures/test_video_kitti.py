@@ -216,7 +216,7 @@ class TestVideoKITTI(unittest.TestCase):
                 if i % n == 0:
                     yield item
 
-        for scan_num, (point_clouds, (labels_gt, masks_gt), _) in tqdm.tqdm(enumerate(every_nth(dataloader, 10))):
+        for scan_num, (point_clouds, (labels_gt, masks_gt), _) in tqdm.tqdm(enumerate(every_nth(dataloader, 1))):
             # Ground truth
             instances_gt = torch.zeros((500, 500, 1))
             for m_idx, m in enumerate(masks_gt[0]):
