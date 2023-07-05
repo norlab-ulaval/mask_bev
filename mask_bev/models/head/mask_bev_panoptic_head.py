@@ -1,5 +1,6 @@
 from typing import List
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 from mmengine.structures import InstanceData
@@ -31,7 +32,8 @@ class MaskBevPanopticHead(nn.Module):
         img_meta = [{} for i in range(cls[0].shape[0])]
         return self._panoptic_head.loss(cls, masks, label_gt, masks_gt, img_meta, heights_pred, heights_gt)
 
-    def update_mAP_metrics(self, layer_index: int, pred_cls, pred_masks, labels_gt, masks_gt, cls_metric: BinaryClassifMapMetric,
+    def update_mAP_metrics(self, layer_index: int, pred_cls, pred_masks, labels_gt, masks_gt,
+                           cls_metric: BinaryClassifMapMetric,
                            map_metric: MeanAveragePrecision, mIoU_metric: MeanIoU):
         """
         Computes the mAP for the given batch

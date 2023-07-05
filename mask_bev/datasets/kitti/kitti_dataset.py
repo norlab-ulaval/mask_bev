@@ -33,6 +33,11 @@ class KittiType(IntEnum):
     def from_string(cls, value):
         return cls.__members__[value]
 
+    @classmethod
+    def to_string(cls, value):
+        rdict = {v: k for k, v in cls.__members__.items()}
+        return rdict[value]
+
 
 class KittiOccluded(IntEnum):
     FullyVisible = 0
@@ -69,6 +74,7 @@ class KittiLabel:
     occluded: KittiOccluded
     # observation angle [-pi, pi]
     alpha: float
+    bbox: np.ndarray
     # [length, width, height] in meters
     dimensions: np.ndarray
     # [x, y, z]
@@ -183,8 +189,8 @@ class KittiDataset(Dataset):
             yaw = -label_cam.rotation_y - np.pi / 2
             yaw = np.arctan2(np.sin(yaw), np.cos(yaw))  # wrap to (-pi, pi)
 
-            label = KittiLabel(label_cam.type, label_cam.truncated, label_cam.occluded, label_cam.alpha, dimensions,
-                               np.array([tx, ty, tz]), yaw)
+            label = KittiLabel(label_cam.type, label_cam.truncated, label_cam.occluded, label_cam.alpha, label_cam.bbox,
+                               dimensions, np.array([tx, ty, tz]), yaw)
             labels.append(label)
         return labels
 
