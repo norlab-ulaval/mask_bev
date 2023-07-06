@@ -1,5 +1,6 @@
 import copy
 import pathlib
+import pickle
 from typing import Union, Dict, Any, Optional
 
 import pytorch_lightning as pl
@@ -329,6 +330,13 @@ class MaskBevModule(pl.LightningModule):
         self.log('val_loss', loss, batch_size=batch_size, prog_bar=True)
         self.log('hp_val_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size)
         self.log_losses(batch_size, loss_dict, 'val')
+
+        # print('Writing validation output')
+        # log_path = pathlib.Path('~/Datasets/KITTI/output_val_01').expanduser()
+        # log_path.mkdir(exist_ok=True)
+        # file_path = log_path / f'{batch_idx}.pkl'
+        # with open(file_path, 'wb') as f:
+        #     pickle.dump((cls, masks, labels_gt, masks_gt), f)
 
         if logging_step:
             instances_gt = self.masks_to_instance_map(masks_gt[0])

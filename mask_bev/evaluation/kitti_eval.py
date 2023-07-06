@@ -23,11 +23,13 @@ class Prediction:
 
 
 def _kitti_label_to_annos(labels: [KittiLabel]):
-    # TODO might need to swap some axes
     num_label = len(labels)
     bboxes = np.array([x.bbox for x in labels])
     locations = np.array([x.location for x in labels])
+
     dimensions = np.array([x.dimensions for x in labels])
+    dimensions = dimensions[:, [2, 1, 0]]  # Convert to lhw
+
     rotation_ys = np.array([x.rotation_y for x in labels])
     scores = np.zeros([num_label])
     alphas = np.array([x.alpha for x in labels])
@@ -39,11 +41,13 @@ def _kitti_label_to_annos(labels: [KittiLabel]):
 
 
 def _preds_to_annos(predictions: [Prediction]):
-    # TODO might need to swap some axes
-    # Dummy bboxes because we do not predict them
+    # Dummy bboxes because we do not predict them, height must be greater than MIN_HEIGHT
     bboxes = np.array([[0, 0, 0, 100] for x in predictions])
     locations = np.array([x.location for x in predictions])
+
     dimensions = np.array([x.dimensions for x in predictions])
+    dimensions = dimensions[:, [2, 1, 0]]  # Convert to lhw
+
     rotation_ys = np.array([x.rotation_y for x in predictions])
     scores = np.array([x.score for x in predictions])
     alphas = np.array([x.alpha for x in predictions])

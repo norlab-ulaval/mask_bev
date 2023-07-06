@@ -67,8 +67,8 @@ class Flip:
     def _flip_y_label(self, label: KittiLabel) -> KittiLabel:
         location = label.location
         location[1] = -location[1]
-        return KittiLabel(label.type, label.truncated, label.occluded, -label.alpha, label.dimensions, location,
-                          -label.rotation_y)
+        return KittiLabel(label.type, label.truncated, label.occluded, -label.alpha, label.bbox, label.dimensions,
+                          location, -label.rotation_y)
 
 
 class ShufflePoints:
@@ -119,8 +119,8 @@ class RandomRotate:
         angle = np.deg2rad(angle)
         location = np.array([*label.location, 1])
         location = (R @ location.T).T
-        return KittiLabel(label.type, label.truncated, label.occluded, label.alpha + angle, label.dimensions,
-                          location[:3], label.rotation_y + angle)
+        return KittiLabel(label.type, label.truncated, label.occluded, label.alpha + angle, label.bbox,
+                          label.dimensions, location[:3], label.rotation_y + angle)
 
 
 class DecimatePoints:
