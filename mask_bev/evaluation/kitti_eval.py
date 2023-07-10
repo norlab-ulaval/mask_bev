@@ -1,8 +1,10 @@
 import io as sysio
 from dataclasses import dataclass
 
+import cv2
 import numba
 import numpy as np
+import torch
 
 from mask_bev.datasets.kitti.kitti_dataset import KittiLabel, KittiType
 from mask_bev.evaluation.rotate_iou import rotate_iou_gpu_eval
@@ -20,6 +22,27 @@ class Prediction:
     # angle around y axis in camera coords [-pi, pi]
     rotation_y: float
     score: float
+
+
+def mask_to_pred(masks, cls) -> [Prediction]:
+    preds = []
+    current_mask = 0
+    mask_num = -1
+    for i in range(masks[mask_num][0].shape[0]):
+        c = cls[mask_num][0][i].argmax()
+        if c > 0:
+            mask = torch.sigmoid((masks[mask_num][0][i]).unsqueeze(0)).cpu().numpy()
+            current_mask += 1
+            ret, thresh = cv2.threshold(mask, 127, 255, 0)
+            cnts, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
+            cnt = cnts[0]
+            ((cx, cy), (w, h), angle) = cv2.minAreaRect(cnt)
+            prediction = Prediction(type=KittiType.Car, alpha=0.0, dimensions=np.array([w, h, 0]),
+                                    location=np.array([cx, cy, 0]), rotation_y=angle, score=1)
+            preds.append(prediction)
+
+    return preds
 
 
 def _kitti_label_to_annos(labels: [KittiLabel]):

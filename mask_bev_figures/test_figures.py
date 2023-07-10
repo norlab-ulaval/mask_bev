@@ -12,6 +12,7 @@ import yaml
 from PIL import Image
 from matplotlib import colors
 
+from mask_bev.datasets.kitti.kitti_data_module import KittiDataModule
 from mask_bev.datasets.semantic_kitti.semantic_kitti_mask_data_module import SemanticKittiMaskDataModule
 from mask_bev.mask_bev_module import MaskBevModule
 
@@ -290,7 +291,7 @@ class TestFigures(unittest.TestCase):
         sample_idx = 0
         pl.seed_everything(45)
 
-        config_path = pathlib.Path('configs/kitti/02_kitti_point_mask_lower_lr_no_abs.yml')
+        config_path = pathlib.Path('configs/training/kitti/02_kitti_point_mask_lower_lr_no_abs.yml')
         checkpoint = pathlib.Path(
             '/home/william/Datasets/checkpoints/72_kitti_point_mask_lower_lr_no_abs/72_kitti_point_mask_lower_lr_no_abs-epoch=63-val_loss=4.438325.ckpt')
 
@@ -304,7 +305,7 @@ class TestFigures(unittest.TestCase):
         config['batch_size'] = 1
         config['num_workers'] = 0
 
-        model = PointMaskModule.from_config(config, exp_name, checkpoint_folder_path)
+        model = MaskBevModule.from_config(config, checkpoint_folder_path)
 
         datamodule = KittiDataModule('data/KITTI', **config)
         gen_figs = True
