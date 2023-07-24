@@ -86,9 +86,12 @@ class MaskBevModule(pl.LightningModule):
         # self._train_metric_per_layer = {layer_index: (
         #     BinaryClassifMapMetric(), MeanAveragePrecision(iou_type='segm', max_det=self._max_detection_per_step, class_metrics=False), MeanIoU()) for
         #     layer_index in range(self.num_layers)}
-        # self._val_metric_per_layer = {layer_index: (
-        #     BinaryClassifMapMetric(), MeanAveragePrecision(iou_type='segm', max_det=self._max_detection_per_step, class_metrics=False), MeanIoU()) for
-        #     layer_index in range(self.num_layers)}
+        self._val_metric_per_layer = {layer_index: (
+            BinaryClassifMapMetric(),
+            MeanAveragePrecision(box_format='cxcywh', iou_type='segm'),
+            # MeanAveragePrecision(iou_type='segm', max_det=self._max_detection_per_step, class_metrics=False),
+            MeanIoU()) for
+            layer_index in range(self.num_layers)}
 
         # TODO add mask area to panoptic head
         self._train_mask_area = MaskArea()
@@ -227,6 +230,10 @@ class MaskBevModule(pl.LightningModule):
                     mAP_prog_bar = False
                 else:
                     mAP_prog_bar = prog_bar
+                if name == 'classes':
+                    continue
+                print(name)
+                print(value)
                 self.log(f'{split}_mAP_{layer_index}_{name}', value, prog_bar=mAP_prog_bar)
             self.log(f'{split}_mIoU_{layer_index}', miou_metric.compute(), prog_bar=prog_bar)
 
@@ -324,24 +331,24 @@ class MaskBevModule(pl.LightningModule):
         loss = self.loss(loss_dict)
 
         # Compute metrics
-        # for layer_index, (cls_metric, map_metric, miou_metric) in self._val_metric_per_layer.items():
-        #     self._panoptic_head.update_mAP_metrics(layer_index, cls, masks, labels_gt, masks_gt, cls_metric, map_metric, miou_metric)
+        for layer_index, (cls_metric, map_metric, miou_metric) in self._val_metric_per_layer.items():
+            self._panoptic_head.update_mAP_metrics(layer_index, cls, masks, labels_gt, masks_gt, cls_metric, map_metric, miou_metric)
 
         self.log('val_loss', loss, batch_size=batch_size, prog_bar=True)
         self.log('hp_val_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size)
         self.log_losses(batch_size, loss_dict, 'val')
 
-        print('Writing validation output')
-        log_path = pathlib.Path('~/Datasets/KITTI/output_val_01').expanduser()
-        log_path.mkdir(exist_ok=True)
-        file_path = log_path / f'{batch_idx}.pkl'
-        with open(file_path, 'wb') as f:
-            c_masks = []
-            for i in range(masks[-1][0].shape[0]):
-                c = cls[-1][0][i].argmax()
-                if c > 0:
-                    c_masks.append(masks[-1][0][i].detach().cpu().numpy())
-            pickle.dump((metadata, c_masks), f)
+        # print('Writing validation output')
+        # log_path = pathlib.Path('~/Datasets/KITTI/output_val_01').expanduser()
+        # log_path.mkdir(exist_ok=True)
+        # file_path = log_path / f'{batch_idx}.pkl'
+        # with open(file_path, 'wb') as f:
+        #     c_masks = []
+        #     for i in range(masks[-1][0].shape[0]):
+        #         c = cls[-1][0][i].argmax()
+        #         if c > 0:
+        #             c_masks.append(masks[-1][0][i].detach().cpu().numpy())
+        #     pickle.dump((metadata, c_masks), f)
 
         if logging_step:
             instances_gt = self.masks_to_instance_map(masks_gt[0])
@@ -358,5 +365,4 @@ class MaskBevModule(pl.LightningModule):
         return loss
 
     def on_validation_epoch_end(self):
-        ...
-        # self.log_metrics('val', self._val_metric_per_layer)
+        self.log_metrics('val', self._val_metric_per_layer)

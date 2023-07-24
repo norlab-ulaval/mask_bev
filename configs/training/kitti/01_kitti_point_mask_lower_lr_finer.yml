@@ -1,6 +1,6 @@
 # General
 seed: 420
-checkpoint:
+checkpoint: last
 
 # Model
 lr: 5.0e-5  # Here
@@ -28,6 +28,8 @@ head_feat_channels: 256
 head_out_channels: 256
 
 # Dataset
+#limit_train_batches: 1
+#limit_val_batches: 1
 dataset: kitti
 batch_size: 4
 num_workers: 4
