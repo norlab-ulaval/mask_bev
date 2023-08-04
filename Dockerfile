@@ -1,7 +1,10 @@
 FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
 
 # Set the current timezone
-ENV TZ=America/Toronto
+ENV TZ=America/Toronto \
+    FORCE_CUDA="1" \
+    TORCH_CUDA_ARCH_LIST="6.0 6.1 7.0 7.5 8.0 8.6+PTX" \
+    TORCH_NVCC_FLAGS="-Xfatbin -compress-all"
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install python and dependencies
