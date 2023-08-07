@@ -11,8 +11,7 @@
 
 cd ~/mask_bev
 docker build -t mask_bev .
-docker run --gpus all -e CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES --rm \
-  --icp=host \
+docker run --gpus all -e CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES --rm --ipc host \
   --mount type=bind,source="$(pwd)",target=/app/ \
   --mount type=bind,source="$(pwd)"/data/SemanticKITTI,target=/app/data/SemanticKITTI \
   --mount type=bind,source="$(pwd)"/data/KITTI,target=/app/data/KITTI \
