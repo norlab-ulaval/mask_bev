@@ -19,7 +19,7 @@ WORKDIR /app
 COPY requirements.txt /app/requirements.txt
 RUN python3.10 -m pip install --upgrade pip
 RUN python3.10 -m pip install -r /app/requirements.txt
-RUN mim install mmcv
+RUN mim install mmcv-full
 RUN mim install mmdet
 RUN mim install mmsegmentation
 RUN mim install mmdet3d
