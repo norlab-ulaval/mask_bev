@@ -381,10 +381,11 @@ def show_point_cloud(win_title: str,
     gl.glDeleteBuffers(1, ebo)
     gl.glDeleteProgram(shader_program)
 
-    gl.glDeleteVertexArrays(1, box_vao)
-    gl.glDeleteBuffers(1, box_vbo)
-    gl.glDeleteBuffers(1, box_ebo)
-    gl.glDeleteProgram(box_shader_program)
+    if has_boxes:
+        gl.glDeleteVertexArrays(1, box_vao)
+        gl.glDeleteBuffers(1, box_vbo)
+        gl.glDeleteBuffers(1, box_ebo)
+        gl.glDeleteProgram(box_shader_program)
 
     glfw.terminate()
 
