@@ -16,7 +16,7 @@ cd data
 ln -s path/to/dataset/SemanticKITTI SemanticKITTI
 ```
 
-### Generate mask cachet
+### Generate mask cache
 
 ```shell
 scripts/generate_semantic_kitti_mask_cache.py
@@ -110,16 +110,11 @@ wget -c  https://raw.githubusercontent.com/traveller59/second.pytorch/master/sec
 wget -c  https://raw.githubusercontent.com/traveller59/second.pytorch/master/second/data/ImageSets/trainval.txt
 
 # then unzip everything
+find . -name '*.zip' | parallel unzip -d {.} {}
 ```
 
 Add a symlink
 ```shell
 cd data
 ln -s ~/Datasets/KITTI KITTI
-```
-
-## Generate object sampler
-
-```shell
-PYTHONPATH=. python scripts/generate_kitti_object_sampler.py
 ```

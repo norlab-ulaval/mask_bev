@@ -3,6 +3,16 @@
 Training parameters are provided via YAML configuration files. See `configs/jobs` for examples.
 A guide on how to write your own configuration file can be found [here](CONFIGURATION.md).
 
+## Generate object sampler
+
+Data augmentation is done by sampling objects from the dataset and applying transformations to them.
+To save time during training, we pre-generate these samples and save them to disk.
+To generate the samples, run the following command:
+
+```shell
+PYTHONPATH=. python scripts/generate_kitti_object_sampler.py
+```
+
 ## Local training
 
 ```shell

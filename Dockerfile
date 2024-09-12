@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
+FROM nvidia/cuda:11.6.1-devel-ubuntu20.04
 
 # Set the current timezone
 ENV TZ=America/Toronto \
@@ -16,11 +16,13 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Preparing workdir
 RUN mkdir /app
 WORKDIR /app
-COPY requirements.txt /app/requirements.txt
-RUN python3.10 -m pip install --upgrade pip
-RUN python3.10 -m pip install -r /app/requirements.txt
-RUN mim install mmcv-full
-RUN mim install mmdet
-RUN mim install mmsegmentation
-RUN mim install mmdet3d
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install torch==1.9.1 torchvision==0.10.1
+RUN python3 -m pip install openmim
+
+RUN mim install mmcv==2.0.0
+RUN mim install mmdet==3.0.0
+RUN mim install mmsegmentation==1.0.0
+RUN mim install mmdet3d==1.1.0
+
 ENV PYTHONPATH=/app:$PYTHONPATH

@@ -18,4 +18,9 @@ mim install mmcv
 mim install mmdet
 mim install mmsegmentation
 mim install mmdet3d
+
+mim install mmcv==2.0.0
+mim install mmdet==3.0.0
+mim install mmsegmentation==1.0.0
+mim install mmdet3d==1.1.0
 ```
