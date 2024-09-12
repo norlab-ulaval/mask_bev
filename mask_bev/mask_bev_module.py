@@ -232,8 +232,6 @@ class MaskBevModule(pl.LightningModule):
                     mAP_prog_bar = prog_bar
                 if name == 'classes':
                     continue
-                print(name)
-                print(value)
                 self.log(f'{split}_mAP_{layer_index}_{name}', value, prog_bar=mAP_prog_bar)
             self.log(f'{split}_mIoU_{layer_index}', miou_metric.compute(), prog_bar=prog_bar)
 

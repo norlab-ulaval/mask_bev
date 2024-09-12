@@ -26,8 +26,8 @@ python train_mask_bev.py --config <path/to/config>
 docker build -t mask_bev .
 
 # Run docker image
-CONFIG=<path/to/config>  # for example `semantic_kitti/00_quick_test.yml`
-CUDA_VISIBLE_DEVICES=all  # or `0,1` for specific GPUs, will be automatically set by SLURM
+export CONFIG=<path/to/config>  # for example `semantic_kitti/00_quick_test.yml`
+export CUDA_VISIBLE_DEVICES=0  # or `0,1` for specific GPUs, will be automatically set by SLURM
 
 # TODO try -v host:container:ro,delegated for volumes
 docker run --gpus all -e CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES --rm -it \

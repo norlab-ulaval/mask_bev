@@ -1,24 +1,24 @@
-numpy
-pyyaml
-torch
-torchvision
-torchaudio
-tensorboard
-poutyne
-pytorch-lightning
-vispy
-matplotlib
-cython
-jupyter
-torch_optimizer
-tk
-pillow-simd
-tqdm
-opencv-python==4.5.5.64
-torch_geometric
-einops
-scalene
-optuna
-SQLAlchemy
-openmim
+openmim==0.3.9
+numpy==1.24.4
+pyyaml==6.0.2
+torch<2.0.0 #==1.11.0
+torchvision #==0.12.0
+tensorboard==2.14.0
+matplotlib==3.5.3
+pillow==10.4.0
+tqdm==4.65.2
 torch_waymo
+opencv-python==4.10.0.84
+pytorch-lightning==1.9.5
+torch_optimizer==0.3.0
+einops==0.8.0
+-f https://download.pytorch.org/whl/cu118
+# torch_geometric
+# optuna
+# SQLAlchemy
+
+# vispy
+# cython
+# jupyter
+# tk
+# scalene
