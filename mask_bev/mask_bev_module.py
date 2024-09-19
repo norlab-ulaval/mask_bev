@@ -1,6 +1,5 @@
 import copy
 import pathlib
-import pickle
 from typing import Union, Dict, Any, Optional
 
 import pytorch_lightning as pl
@@ -83,9 +82,10 @@ class MaskBevModule(pl.LightningModule):
         self.num_layers = 10
         self._max_detection_per_step = num_queries * batch_size
 
-        # self._train_metric_per_layer = {layer_index: (
-        #     BinaryClassifMapMetric(), MeanAveragePrecision(iou_type='segm', max_det=self._max_detection_per_step, class_metrics=False), MeanIoU()) for
-        #     layer_index in range(self.num_layers)}
+        self._train_metric_per_layer = {layer_index: (
+            BinaryClassifMapMetric(),
+            MeanAveragePrecision(iou_type='segm', class_metrics=False), MeanIoU())
+            for layer_index in range(self.num_layers)}
         self._val_metric_per_layer = {layer_index: (
             BinaryClassifMapMetric(),
             MeanAveragePrecision(box_format='cxcywh', iou_type='segm'),
@@ -270,8 +270,9 @@ class MaskBevModule(pl.LightningModule):
         loss = self.loss(loss_dict)
 
         # Compute metrics
-        # for layer_index, (cls_metric, map_metric, miou_metric) in self._train_metric_per_layer.items():
-        #     self._panoptic_head.update_mAP_metrics(layer_index, cls, masks, labels_gt, masks_gt, cls_metric, map_metric, miou_metric)
+        for layer_index, (cls_metric, map_metric, miou_metric) in self._train_metric_per_layer.items():
+            self._panoptic_head.update_mAP_metrics(layer_index, cls, masks, labels_gt, masks_gt, cls_metric, map_metric,
+                                                   miou_metric)
 
         self.log('train_loss', loss, batch_size=batch_size, prog_bar=True)
         self.log('hp_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size)
@@ -330,7 +331,8 @@ class MaskBevModule(pl.LightningModule):
 
         # Compute metrics
         for layer_index, (cls_metric, map_metric, miou_metric) in self._val_metric_per_layer.items():
-            self._panoptic_head.update_mAP_metrics(layer_index, cls, masks, labels_gt, masks_gt, cls_metric, map_metric, miou_metric)
+            self._panoptic_head.update_mAP_metrics(layer_index, cls, masks, labels_gt, masks_gt, cls_metric, map_metric,
+                                                   miou_metric)
 
         self.log('val_loss', loss, batch_size=batch_size, prog_bar=True)
         self.log('hp_val_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size)
