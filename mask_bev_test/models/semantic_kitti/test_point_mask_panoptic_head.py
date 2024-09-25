@@ -4,7 +4,7 @@ import unittest
 import torch
 from torchmetrics.detection import MeanAveragePrecision
 
-from mask_bev.evaluation.detection_metric import BinaryClassifMapMetric, DetectionMapMetric, MeanIoU
+from mask_bev.evaluation.detection_metric import BinaryClassifMapMetric, MeanIoU
 from mask_bev.models.head.mask_bev_panoptic_head import MaskBevPanopticHead
 
 tracemalloc.start()
@@ -50,7 +50,8 @@ class TestMaskBevPanopticHead(unittest.TestCase):
         map_metric = MeanAveragePrecision(iou_type='segm', max_det=max_det)
         mIoU_metric = MeanIoU()
 
-        self.panoptic_head.update_mAP_metrics(cls, masks, self.labels_gt, self.masks_gt, cls_metric, map_metric, mIoU_metric)
+        self.panoptic_head.update_mAP_metrics(cls, masks, self.labels_gt, self.masks_gt, cls_metric, map_metric,
+                                              mIoU_metric)
 
         mAP = map_metric.compute()
         self.assertTrue(isinstance(mAP, dict))

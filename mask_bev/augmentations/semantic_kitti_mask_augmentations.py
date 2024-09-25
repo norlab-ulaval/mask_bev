@@ -2,9 +2,9 @@ import copy
 import numbers
 from typing import Union, Tuple, Optional, Dict, List, Callable
 
+import cv2
 import numpy as np
 import torch
-import cv2
 from torchvision.transforms import RandomErasing
 
 from mask_bev.augmentations.rand_augment import RandAugment

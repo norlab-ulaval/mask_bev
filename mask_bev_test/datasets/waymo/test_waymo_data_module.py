@@ -14,7 +14,8 @@ class TestWaymoDataModule(unittest.TestCase):
         self.batch_size = 2
 
     def test_tensor_batch(self):
-        datamodule = WaymoDataModule('~/Datasets/Waymo/converted', self.batch_size, 1, 50, (-40, 40), (-40, 40), (-20, 20),
+        datamodule = WaymoDataModule('~/Datasets/Waymo/converted', self.batch_size, 1, 50, (-40, 40), (-40, 40),
+                                     (-20, 20),
                                      0.16, True, collate_fn=CollateType.TensorCollate, shuffle_train=False)
         dataloader = datamodule.train_dataloader()
 
@@ -39,7 +40,8 @@ class TestWaymoDataModule(unittest.TestCase):
         self.assertTrue(isinstance(masks, torch.Tensor))
 
     def test_list_batch(self):
-        datamodule = WaymoDataModule('~/Datasets/Waymo/converted', self.batch_size, 1, 50, (-40, 40), (-40, 40), (-20, 20),
+        datamodule = WaymoDataModule('~/Datasets/Waymo/converted', self.batch_size, 1, 50, (-40, 40), (-40, 40),
+                                     (-20, 20),
                                      0.16, True, collate_fn=CollateType.TensorCollate, shuffle_train=False,
                                      num_workers=0)
         dataloader = datamodule.train_dataloader()
@@ -57,7 +59,8 @@ class TestWaymoDataModule(unittest.TestCase):
     @unittest.skip("plots")
     def test_data_make_sense(self):
 
-        datamodule = WaymoDataModule('~/Datasets/Waymo/converted', self.batch_size, 1, 50, (-40, 40), (-40, 40), (-20, 20),
+        datamodule = WaymoDataModule('~/Datasets/Waymo/converted', self.batch_size, 1, 50, (-40, 40), (-40, 40),
+                                     (-20, 20),
                                      0.16, True, collate_fn=CollateType.TensorCollate, shuffle_train=True,
                                      num_workers=0)
         # Each mask should be different
@@ -73,7 +76,8 @@ class TestWaymoDataModule(unittest.TestCase):
 
     @unittest.skip("num queries is very long")
     def test_list_batch_num_queries_train(self):
-        datamodule = WaymoDataModule('~/Datasets/Waymo/converted', self.batch_size, 1, 50, (-40, 40), (-40, 40), (-20, 20),
+        datamodule = WaymoDataModule('~/Datasets/Waymo/converted', self.batch_size, 1, 50, (-40, 40), (-40, 40),
+                                     (-20, 20),
                                      0.16, True, collate_fn=CollateType.TensorCollate, shuffle_train=False,
                                      num_workers=0)
         dataloader = datamodule.train_dataloader()

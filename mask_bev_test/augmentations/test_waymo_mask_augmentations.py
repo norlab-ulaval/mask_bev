@@ -1,11 +1,11 @@
 import unittest
 
 import numpy as np
-import mask_bev.utils.pipeline as pp
 import pytorch_lightning as pl
 import torch
 from matplotlib import pyplot as plt
 
+import mask_bev.utils.pipeline as pp
 from mask_bev.augmentations.waymo_mask_augmentations import Flip, ShufflePoints, RandomRotate, DecimatePoints, \
     JitterPoints, RandomDropPoints
 from mask_bev.datasets.collate_type import CollateType
