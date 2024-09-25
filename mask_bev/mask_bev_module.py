@@ -196,15 +196,15 @@ class MaskBevModule(pl.LightningModule):
 
     def log_losses(self, batch_size, loss_dict, mode):
         for k, v in loss_dict.items():
-            self.log(f'{mode}_{k}', float(v), batch_size=batch_size)
+            self.log(f'{mode}_{k}', float(v), batch_size=batch_size, sync_dist=True)
         loss_dice = float(sum(value for key, value in loss_dict.items() if 'dice' in key))
         loss_mask = float(sum(value for key, value in loss_dict.items() if 'mask' in key))
         loss_cls = float(sum(value for key, value in loss_dict.items() if 'cls' in key))
         loss_height = float(sum(value for key, value in loss_dict.items() if 'height' in key))
-        self.log(f'hp_{mode}_dice', loss_dice, on_step=False, on_epoch=True, batch_size=batch_size)
-        self.log(f'hp_{mode}_mask', loss_mask, on_step=False, on_epoch=True, batch_size=batch_size)
-        self.log(f'hp_{mode}_cls', loss_cls, on_step=False, on_epoch=True, batch_size=batch_size)
-        self.log(f'hp_{mode}_height', loss_height, on_step=False, on_epoch=True, batch_size=batch_size)
+        self.log(f'hp_{mode}_dice', loss_dice, on_step=False, on_epoch=True, batch_size=batch_size, sync_dist=True)
+        self.log(f'hp_{mode}_mask', loss_mask, on_step=False, on_epoch=True, batch_size=batch_size, sync_dist=True)
+        self.log(f'hp_{mode}_cls', loss_cls, on_step=False, on_epoch=True, batch_size=batch_size, sync_dist=True)
+        self.log(f'hp_{mode}_height', loss_height, on_step=False, on_epoch=True, batch_size=batch_size, sync_dist=True)
 
     def log_normalize_img(self, img):
         img = torch.log(torch.linalg.norm(img, dim=0).unsqueeze(0))
@@ -232,8 +232,8 @@ class MaskBevModule(pl.LightningModule):
                     mAP_prog_bar = prog_bar
                 if name == 'classes':
                     continue
-                self.log(f'{split}_mAP_{layer_index}_{name}', value, prog_bar=mAP_prog_bar)
-            self.log(f'{split}_mIoU_{layer_index}', miou_metric.compute(), prog_bar=prog_bar)
+                self.log(f'{split}_mAP_{layer_index}_{name}', value, prog_bar=mAP_prog_bar, sync_dist=True)
+            self.log(f'{split}_mIoU_{layer_index}', miou_metric.compute(), prog_bar=prog_bar, sync_dist=True)
 
             cls_metric.reset()
             map_metric.reset()
@@ -274,9 +274,9 @@ class MaskBevModule(pl.LightningModule):
             self._panoptic_head.update_mAP_metrics(layer_index, cls, masks, labels_gt, masks_gt, cls_metric, map_metric,
                                                    miou_metric)
 
-        self.log('train_loss', loss, batch_size=batch_size, prog_bar=True)
-        self.log('hp_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size)
-        self.log_losses(batch_size, loss_dict, 'train')
+        self.log('train_loss', loss, batch_size=batch_size, prog_bar=True, sync_dist=True)
+        self.log('hp_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size, sync_dist=True)
+        self.log_losses(batch_size, loss_dict, 'train', sync_dist=True)
 
         if logging_step:
             instances_gt = self.masks_to_instance_map(masks_gt[0])
@@ -334,9 +334,9 @@ class MaskBevModule(pl.LightningModule):
             self._panoptic_head.update_mAP_metrics(layer_index, cls, masks, labels_gt, masks_gt, cls_metric, map_metric,
                                                    miou_metric)
 
-        self.log('val_loss', loss, batch_size=batch_size, prog_bar=True)
-        self.log('hp_val_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size)
-        self.log_losses(batch_size, loss_dict, 'val')
+        self.log('val_loss', loss, batch_size=batch_size, prog_bar=True, sync_dist=True)
+        self.log('hp_val_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size, sync_dist=True)
+        self.log_losses(batch_size, loss_dict, 'val', sync_dist=True)
 
         # print('Writing validation output')
         # log_path = pathlib.Path('~/Datasets/KITTI/output_val_01').expanduser()

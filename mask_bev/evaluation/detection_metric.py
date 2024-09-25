@@ -22,6 +22,10 @@ class BinaryClassifMapMetric(Metric):
     def compute(self):
         if len(self.y_score) == 0 or len(self.y_true) == 0:
             return 0.0
+        if isinstance(self.y_score, torch.Tensor):
+            self.y_score = [self.y_score]
+        if isinstance(self.y_true, torch.Tensor):
+            self.y_true = [self.y_true]
         y_score = torch.cat(self.y_score)
         y_true = torch.cat(self.y_true)
         return MF.classification.binary_average_precision(y_score, y_true, thresholds=11)
@@ -82,6 +86,8 @@ class MeanIoU(Metric):
     def compute(self):
         if len(self.ious) == 0:
             return 0.0
+        if isinstance(self.ious, torch.Tensor):
+            self.ious = [self.ious]
         ious = torch.concatenate(self.ious)
         return torch.mean(ious)
 
