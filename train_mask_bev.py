@@ -1,11 +1,8 @@
 import argparse
 import os
 import re
-import subprocess
-import sys
 
 import yaml
-from pytorch_lightning.cli import ReduceLROnPlateau
 
 from mask_bev.augmentations.kitti_mask_augmentations import make_kitti_augmentation_list
 from mask_bev.augmentations.semantic_kitti_mask_augmentations import make_semantic_kitti_augmentation_list
@@ -24,6 +21,15 @@ from pytorch_lightning.loggers import TensorBoardLogger
 import mask_bev.utils.pipeline as pp
 
 from mask_bev.datasets.semantic_kitti.semantic_kitti_mask_data_module import SemanticKittiMaskDataModule
+
+
+def get_val_loss(x):
+    return float(val_loss_regex.search(str(x)).group(1))
+
+
+def identity(x):
+    return x
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -48,8 +54,9 @@ if __name__ == '__main__':
 
     if is_testing:
         val_loss_regex = re.compile(r'val_loss=([0-9]+\.?[0-9]*)')
-        checkpoints = [f for f in checkpoint_folder_path.iterdir() if f.suffix != 'last.ckpt' and not f.name.startswith('last')]
-        best_checkpoint = min(checkpoints, key=lambda x: float(val_loss_regex.search(str(x)).group(1)))
+        checkpoints = [f for f in checkpoint_folder_path.iterdir() if
+                       f.suffix != 'last.ckpt' and not f.name.startswith('last')]
+        best_checkpoint = min(checkpoints, key=get_val_loss)
         print(f'Testing from {best_checkpoint}')
         config['checkpoint'] = str(best_checkpoint)
         config['batch_size'] = config.get('test_batch_size', config.get('batch_size', 1))
@@ -65,12 +72,12 @@ if __name__ == '__main__':
         datamodule = SemanticKittiMaskDataModule('data/SemanticKITTI', dataset_transform=augmentation, **config)
     elif dataset_name == 'waymo':
         frame_aug = pp.Compose(make_waymo_augmentation_list(augmentations_list))
-        mask_aug = lambda x: x
+        mask_aug = identity
         datamodule = WaymoDataModule('data/Waymo/converted', frame_transform=frame_aug, mask_transform=mask_aug,
                                      **config)
     elif dataset_name == 'kitti':
         frame_aug = pp.Compose(make_kitti_augmentation_list(augmentations_list))
-        mask_aug = lambda x: x
+        mask_aug = identity
         datamodule = KittiDataModule('data/KITTI', frame_transform=frame_aug, mask_transform=mask_aug, **config)
     else:
         raise NotImplementedError(dataset_name)
@@ -84,8 +91,9 @@ if __name__ == '__main__':
     check_metric = 'val_loss' if limit_val_batches > 0 else 'train_loss'
     num_gpus = len(os.environ.get('CUDA_VISIBLE_DEVICES', '0').split(','))
     available_gpu = list(range(num_gpus))
+    strategy = 'ddp' if num_gpus > 1 else 'auto'
     print(f'Using GPUs {available_gpu}')
-    trainer = pl.Trainer(accelerator='gpu', devices=available_gpu, precision=32, logger=logger,
+    trainer = pl.Trainer(accelerator='gpu', devices=available_gpu, precision=32, logger=logger, strategy=strategy,
                          min_epochs=0, max_epochs=1000,
                          log_every_n_steps=log_every_n_steps,
                          limit_train_batches=limit_train_batches, limit_val_batches=limit_val_batches,

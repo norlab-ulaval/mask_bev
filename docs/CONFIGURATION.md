@@ -66,6 +66,7 @@ background class.
 `head_num_classes`: Number of classes of the head output.
 
 ## Dataset
+
 `min_num_inst_pixels`: Minimum number of pixels to keep an instance in the dataset.
 
 `batch_size`: Batch size.
@@ -97,9 +98,9 @@ Select the ones you want using
 
 ```yaml
 augmentations:
-    - name: <augmentation name>
-        <augmentation parameters>
-    - name: <augmentation name>
-        <augmentation parameters>
+  - name: <augmentation name>
+      <augmentation parameters>
+  - name: <augmentation name>
+      <augmentation parameters>
 ```
 

@@ -4,7 +4,9 @@ Instructions for preparing the datasets used in MaskBEV.
 For Valeria specific instructions, see [Valeria instructions](docs/VALERIA.md).
 
 ## SemanticKITTI
+
 Download the following files and extract them
+
 - [KITTI Odometry Benchmark Velodyne point clouds (80 GB)](https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_velodyne.zip)
 - [KITTI Odometry Benchmark calibration data (1 MB)](https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_calib.zip)
 - [SemanticKITTI label data (179 MB)](http://semantic-kitti.org/assets/data_odometry_labels.zip)
@@ -25,10 +27,13 @@ scripts/generate_semantic_kitti_mask_cache.py
 ## KITTI-360
 
 Download the following files and extract them
+
 - [Calibrations](https://s3.eu-central-1.amazonaws.com/avg-projects/KITTI-360/384509ed5413ccc81328cf8c55cc6af078b8c444/calibration.zip)
-- [Vehicle Poses](https://s3.eu-central-1.amazonaws.com/avg-projects/KITTI-360/89a6bae3c8a6f789e12de4807fc1e8fdcf182cf4/data_poses.zip), extract to `data_poses`
+- [Vehicle Poses](https://s3.eu-central-1.amazonaws.com/avg-projects/KITTI-360/89a6bae3c8a6f789e12de4807fc1e8fdcf182cf4/data_poses.zip),
+  extract to `data_poses`
 - [3D Bounding Boxes](https://s3.eu-central-1.amazonaws.com/avg-projects/KITTI-360/ffa164387078f48a20f0188aa31b0384bb19ce60/data_3d_bboxes.zip)
-- [Raw Velodyne Scans](https://s3.eu-central-1.amazonaws.com/avg-projects/KITTI-360/a1d81d9f7fc7195c937f9ad12e2a2c66441ecb4e/download_3d_velodyne.zip), run the script to download
+- [Raw Velodyne Scans](https://s3.eu-central-1.amazonaws.com/avg-projects/KITTI-360/a1d81d9f7fc7195c937f9ad12e2a2c66441ecb4e/download_3d_velodyne.zip),
+  run the script to download
 - [Accumulated Point Clouds for Train & Val](https://s3.eu-central-1.amazonaws.com/avg-projects/KITTI-360/6489aabd632d115c4280b978b2dcf72cb0142ad9/data_3d_semantics.zip)
 
 TODO
@@ -66,6 +71,7 @@ gsutil -m cp \
 ```
 
 Add a symlink
+
 ```shell
 cd data
 ln -s ~/Datasets/Waymo Waymo
@@ -114,6 +120,7 @@ find . -name '*.zip' | parallel unzip -d {.} {}
 ```
 
 Add a symlink
+
 ```shell
 cd data
 ln -s ~/Datasets/KITTI KITTI

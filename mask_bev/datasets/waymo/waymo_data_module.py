@@ -9,7 +9,7 @@ import mask_bev.utils.pipeline as pp
 from mask_bev.datasets.apply_transform import ApplyTransform
 from mask_bev.datasets.collate_type import CollateType
 from mask_bev.datasets.waymo.waymo_transforms import FrameMaskListCollate, FrameMaskTensorCollate, FrameToPointCloud, \
-    ShufflePointCloud, FrameScanToMask, FrameMasksToLabelInstanceMasks, FrameMetaData, LabelMaskToMask2FormerLabel
+    ShufflePointCloud, FrameScanToMask, FrameMasksToLabelInstanceMasks, FrameMetaData
 
 
 # TODO unify with other data modules

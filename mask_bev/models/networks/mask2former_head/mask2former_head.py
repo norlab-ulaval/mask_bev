@@ -217,15 +217,15 @@ class Mask2FormerHead(MaskFormerHead):
         neg_inds = sampling_result.neg_inds
 
         # label target
-        labels = gt_labels.new_full((self.num_queries, ),
+        labels = gt_labels.new_full((self.num_queries,),
                                     self.num_classes,
                                     dtype=torch.long)
         labels[pos_inds] = gt_labels[sampling_result.pos_assigned_gt_inds]
-        label_weights = gt_labels.new_ones((self.num_queries, ))
+        label_weights = gt_labels.new_ones((self.num_queries,))
 
         # mask target
         mask_targets = gt_masks[sampling_result.pos_assigned_gt_inds]
-        mask_weights = mask_pred.new_zeros((self.num_queries, ))
+        mask_weights = mask_pred.new_zeros((self.num_queries,))
         mask_weights[pos_inds] = 1.0
 
         return (labels, label_weights, mask_targets, mask_weights, pos_inds,
@@ -349,7 +349,7 @@ class Mask2FormerHead(MaskFormerHead):
         heights_list_gt = [heights_gt[i] for i in range(num_imgs)]
         (labels_list, label_weights_list, mask_targets_list, mask_weights_list,
          avg_factor, height_list_gt) = self.get_targets(cls_scores_list, mask_preds_list,
-                                        batch_gt_instances, batch_img_metas, heights=heights_list_gt)
+                                                        batch_gt_instances, batch_img_metas, heights=heights_list_gt)
         # shape (batch_size, num_queries)
         labels = torch.stack(labels_list, dim=0)
         # shape (batch_size, num_queries)

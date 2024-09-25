@@ -12,7 +12,7 @@ from mask_bev.datasets.kitti.kitti_dataset import KittiDataset
 from mask_bev.datasets.kitti.kitti_transforms import FrameMaskListCollate, FrameMaskTensorCollate, FrameToPointCloud, \
     ShufflePointCloud, FrameScanToMask, FrameMasksToLabelInstanceMasks, FrameMetaData, FrameDifficulty, \
     FrameRoundedHeight, \
-    FilterLabelDifficulty, ObjectRangeFilter, LabelMaskToMask2FormerLabel
+    FilterLabelDifficulty, ObjectRangeFilter
 
 
 # TODO unify with other DataModules
