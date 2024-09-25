@@ -16,6 +16,7 @@ PYTHONPATH=. python scripts/generate_kitti_object_sampler.py
 ```
 
 ### Training
+
 ```shell
 python train_mask_bev.py --config <path/to/config>
 ```

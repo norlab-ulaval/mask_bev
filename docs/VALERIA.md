@@ -2,7 +2,8 @@
 
 ## Datasets
 
-Follow [`Valeria` from Norlab_wiki](https://github.com/norlab-ulaval/Norlab_wiki/wiki/Valeria) to upload the datasets to Valeria.
+Follow [`Valeria` from Norlab_wiki](https://github.com/norlab-ulaval/Norlab_wiki/wiki/Valeria) to upload the datasets to
+Valeria.
 
 Also add symbolic links in `data/` to the datasets.
 
