@@ -223,7 +223,7 @@ class MaskBevModule(pl.LightningModule):
     def log_metrics(self, split, metric_dict):
         for layer_index, (cls_metric, map_metric, miou_metric) in metric_dict.items():
             prog_bar = layer_index == self.num_layers - 1
-            self.log(f'{split}_mAP_cls_{layer_index}', cls_metric.compute(), prog_bar=prog_bar)
+            self.log(f'{split}_mAP_cls_{layer_index}', cls_metric.compute(), prog_bar=prog_bar, sync_dist=True)
             mAPs = map_metric.compute()
             for name, value in mAPs.items():
                 if 'small' in name or 'medium' in name or 'large' in name or 'mar' in name:
