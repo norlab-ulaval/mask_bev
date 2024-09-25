@@ -959,3 +959,7 @@ class TestFigures(unittest.TestCase):
                 # Plot
                 plt.imshow(instances_gt[:, :])
                 plt.show()
+
+
+if __name__ == '__main__':
+    unittest.main()

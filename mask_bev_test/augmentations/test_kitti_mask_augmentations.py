@@ -102,3 +102,7 @@ class TestMaskAugmentations(unittest.TestCase):
             point_clouds, (labels, masks), metadata = next(iterator)
         self._show(id_masks, id_point_clouds)
         self._show(masks, point_clouds)
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -276,3 +276,7 @@ class TestVideoKITTI(unittest.TestCase):
                 plt.show()
                 if j == 2:
                     break
+
+
+if __name__ == '__main__':
+    unittest.main()
