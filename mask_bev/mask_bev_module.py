@@ -276,7 +276,7 @@ class MaskBevModule(pl.LightningModule):
 
         self.log('train_loss', loss, batch_size=batch_size, prog_bar=True, sync_dist=True)
         self.log('hp_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size, sync_dist=True)
-        self.log_losses(batch_size, loss_dict, 'train', sync_dist=True)
+        self.log_losses(batch_size, loss_dict, 'train')
 
         if logging_step:
             instances_gt = self.masks_to_instance_map(masks_gt[0])
@@ -336,7 +336,7 @@ class MaskBevModule(pl.LightningModule):
 
         self.log('val_loss', loss, batch_size=batch_size, prog_bar=True, sync_dist=True)
         self.log('hp_val_metric', loss, on_step=False, on_epoch=True, batch_size=batch_size, sync_dist=True)
-        self.log_losses(batch_size, loss_dict, 'val', sync_dist=True)
+        self.log_losses(batch_size, loss_dict, 'val')
 
         # print('Writing validation output')
         # log_path = pathlib.Path('~/Datasets/KITTI/output_val_01').expanduser()
